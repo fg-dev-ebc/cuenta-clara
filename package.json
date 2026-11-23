@@ -1,0 +1,45 @@
+{
+  "name": "cuenta-clara",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n api,web \"node --env-file-if-exists=.env.local --watch server/index.js\" \"vite --strictPort\"",
+    "build": "vite build",
+    "start": "node --env-file-if-exists=.env.local server/index.js",
+    "db:migrate": "node --env-file-if-exists=.env.local server/migrate.js",
+    "db:admin": "node --env-file-if-exists=.env.local server/admin-grant.js",
+    "storage:cors": "node --env-file-if-exists=.env.local server/storage-cors.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3",
+    "@aws-sdk/s3-presigned-post": "^3",
+    "@aws-sdk/s3-request-presigner": "^3",
+    "@fontsource-variable/geist": "^5",
+    "@fontsource-variable/geist-mono": "^5",
+    "@hono/node-server": "^1",
+    "@neon/auth": "^0.8.1",
+    "@neon/realtime": "^0.2",
+    "@neon/realtime-react": "^0.2",
+    "hono": "^4",
+    "jose": "^6",
+    "pg": "^8",
+    "react": "^19",
+    "react-dom": "^19",
+    "react-router": "^7",
+    "sharp": "^0.34",
+    "zod": "^4"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4",
+    "@vitejs/plugin-react": "^5",
+    "concurrently": "^9",
+    "tailwindcss": "^4",
+    "vite": "^7"
+  },
+  "packageManager": "pnpm@9.15.4+sha512.b2dc20e2fc72b3e18848459b37359a32064663e5627a51e4c74b2c29dd8e8e0491483c3abb40789cfd578bf362fb6ba8261b05f0387d76792ed6e23ea3b1b6a0"
+}
