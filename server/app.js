@@ -28,6 +28,8 @@ storageRoutes(app)
 liveRoutes(app)
 adminRoutes(app)
 
+app.notFound((c) => c.json({ error: 'Ruta no encontrada.' }, 404))
+
 app.onError((error, c) => {
   if (error instanceof HTTPException) return c.json({ error: error.message }, error.status)
   if (error instanceof ZodError) {

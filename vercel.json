@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "regions": ["iad1"],
+  "rewrites": [
+    { "source": "/api/:__cc_api_path+", "destination": "/api/handler?__cc_api_path=:__cc_api_path" },
+    { "source": "/((?!api(?:/|$)|assets(?:/|$)|.*\\.).*)", "destination": "/index.html" }
+  ]
+}

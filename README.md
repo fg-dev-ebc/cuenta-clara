@@ -31,6 +31,14 @@ npm run dev
 
 La web abre en `http://localhost:5173` y la API en el puerto `3001`. Para servir la compilación y API juntas, ejecuta `npm run build` y `npm start`. En producción usa HTTPS, establece `APP_ORIGIN` en el origen público de la web y regístralo en Neon Auth, Realtime y CORS de Object Storage. En Auth, usa SMTP propio para entregar códigos de verificación.
 
+## Despliegue en Vercel
+
+Despliega la raíz del repositorio, no solo `dist/`: `vercel.json` sirve la web de Vite y enruta `/api/*` a `api/handler.js`, que reutiliza la API Hono. Las rutas de React como `/login` y `/perfil` también se pueden abrir directamente.
+
+En el proyecto de Vercel, configura `APP_ORIGIN=https://cuenta-clara-hackathon.vercel.app` para producción y las variables del backend que corresponden a la rama Neon desplegada: `DATABASE_URL`, `NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET`, `NEON_REALTIME_URL`, `NEON_REALTIME_SECRET`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_ENDPOINT_URL_S3` y `AWS_REGION`. Agrega `GOOGLE_PLACES_API_KEY` para habilitar esa búsqueda auxiliar. No uses el prefijo `VITE_` para estas variables. Las migraciones usan la conexión directa por separado; la API desplegada usa la conexión con pool.
+
+Una vez que controles el dominio, autoriza `https://cuenta-clara-hackathon.vercel.app` en Neon Auth y en los orígenes de Realtime para esa rama. En Object Storage, añade CORS de subida para el mismo origen: `npm run storage:cors -- https://cuenta-clara-hackathon.vercel.app` con las credenciales de la rama correspondiente. Después de desplegar, comprueba que `/api/config` y `/api/categories` devuelven JSON y que `/login` abre la aplicación.
+
 ### Google Places
 
 Habilita **Places API (New)** y facturación en Google Cloud. Guarda la clave restringida en `.env.local` como `GOOGLE_PLACES_API_KEY`, sin prefijo `VITE_`. Si no hay clave, el alta manual y la búsqueda del directorio siguen funcionando. El flujo auxiliar no copia automáticamente resultados de Google a Postgres; solo guarda el identificador del lugar y los datos aportados por una fuente autorizada.
