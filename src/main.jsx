@@ -10,6 +10,7 @@ import { AdminBranches, AdminCategories, AdminLayout, AdminModeration, AdminRequ
 import { BranchPage, DirectoryPage } from './directory.jsx'
 import { PitchPage } from './pitch.jsx'
 import { PublishPage, RequestPage } from './publish.jsx'
+import { SiteAds } from './site-ads.jsx'
 import { Empty, Footer, Header, PageHeading } from './ui.jsx'
 import './site-theme.css'
 
@@ -32,9 +33,7 @@ function Legal({ privacy = false }) {
 function App() {
   const { pathname } = useLocation()
   useLayoutEffect(() => { window.scrollTo(0, 0) }, [pathname])
-  return <>
-    <Header />
-    <main id="contenido" tabIndex={-1}><Routes>
+  const routes = <Routes>
       <Route path="/" element={<DirectoryPage home />} />
       <Route path="/establecimientos" element={<DirectoryPage />} />
       <Route path="/establecimientos/:slug" element={<BranchPage />} />
@@ -59,7 +58,10 @@ function App() {
       <Route path="/pitch-hackathon" element={<PitchPage />} />
       <Route path="/pitch-hackaton" element={<Navigate replace to="/pitch-hackathon" />} />
       <Route path="*" element={<div className="shell reading page-pad missing-page"><Empty title="Página no encontrada"><Link className="inline-link" to="/">Volver al inicio →</Link></Empty></div>} />
-    </Routes></main>
+  </Routes>
+  return <>
+    <Header />
+    <main id="contenido" tabIndex={-1}><SiteAds>{routes}</SiteAds></main>
     <Footer />
   </>
 }

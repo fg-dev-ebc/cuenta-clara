@@ -37,6 +37,23 @@ body {
 .nav small { color: var(--blush); }
 .nav a.active:not(.button) { text-decoration-thickness: 2px; text-underline-offset: .42em; }
 .header-cta { border-radius: 100px; padding-inline: 1.15rem; }
+.header-pitch {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: var(--blush);
+}
+.header-pitch svg { fill: currentColor; }
+.header-pitch:hover, .header-pitch[aria-current="page"] { color: #ffe1ec; }
+@media (prefers-reduced-motion: no-preference) {
+  .header-pitch:not([aria-current="page"]) svg { animation: header-pitch-pulse 3.2s ease-in-out infinite; }
+}
+@keyframes header-pitch-pulse {
+  0%, 100% { opacity: .55; }
+  50% { opacity: 1; }
+}
 .brand-divider,.nav a.active:not(.button) { color: var(--blush); }
 .button-dark,.editorial .search-hero .button,.admin-layout aside nav a.active {
   color: var(--ink); background: var(--blush); border-color: #dbaabb;
@@ -120,6 +137,16 @@ input[type="checkbox"] { accent-color: var(--wine); }
   clip-path: polygon(0 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%);
 }
 .branch-seal > span { color: var(--blush); }
+@media (max-width: 760px) {
+  .header-inner { min-height: 60px; gap: .6rem; }
+  .mobile-menu { font: 550 .71rem var(--font-mono); }
+  .site-header .nav.is-open { gap: .2rem; padding: .65rem; background: #30252d; border-top: 3px solid var(--blush); box-shadow: 0 12px 28px #150e1755; }
+  .nav.is-open a:not(.button) { min-height: 42px; align-items: center; padding-inline: .65rem; }
+}
+@media (max-width: 380px) {
+  .site-header .brand { font-size: 1.32rem; }
+  .site-header .brand-mark { width: 29px; height: 29px; }
+}
 @media (max-width: 640px) {
   .demo-reply .demo-signer { flex-direction: column; align-items: flex-start; }
 }
@@ -208,10 +235,6 @@ input[type="checkbox"] { accent-color: var(--wine); }
   .branch-photo { width: 4.75rem; padding: .2rem; }
   .footer-imprint { gap: .5rem; }
   .footer-imprint .engraving { width: 1.6rem; }
-  .header-inner { min-height: 60px; }
-  .mobile-menu { font: 550 .71rem var(--font-mono); }
-  .site-header .nav.is-open { gap: .2rem; padding: .65rem; background: #30252d; border-top: 3px solid var(--blush); box-shadow: 0 12px 28px #150e1755; }
-  .nav.is-open a:not(.button) { min-height: 42px; align-items: center; padding-inline: .65rem; }
   .footer-content { display: grid; grid-template-columns: 1fr; }
   .footer-note { font-size: .62rem; }
   .imprint-barcode { width: 35px; }

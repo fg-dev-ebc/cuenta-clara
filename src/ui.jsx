@@ -19,6 +19,7 @@ const paths = {
   logout: 'M10 4H5v16h5m-1-8h11m-4-4 4 4-4 4',
   fork: 'M6 3v6c0 2 2 3 3 3s3-1 3-3V3M9 3v18m10-18v18m0-18c-3 2-4 5-4 8h4',
   camera: 'M3 7h4l2-3h6l2 3h4v13H3V7Zm12.5 6a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z',
+  play: 'm8 5 12 7-12 7V5Z',
 }
 
 export function Icon({ name, size = 18, ...props }) {
@@ -69,6 +70,9 @@ export function Header() {
     <a className="skip" href="#contenido">Saltar al contenido</a>
     <div className="shell header-inner">
       <Brand />
+      <NavLink className="header-pitch" to="/pitch-hackathon" aria-label="Ver pitch">
+        <Icon name="play" size={16} />
+      </NavLink>
       <div className="header-end">
         <button className="icon-button mobile-menu" type="button" aria-label={open ? 'Cerrar menú' : 'Abrir menú'} aria-expanded={open} aria-controls="nav"
           onClick={() => { if (profile.current) profile.current.open = false; setOpen(!open) }}>Menú <Icon name={open ? 'close' : 'menu'} size={16} /></button>
