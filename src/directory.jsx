@@ -34,10 +34,15 @@ function Receipt() {
           {Array.from({ length: 32 }, (_, i) => <ellipse key={i} cx="100" cy="100" rx="85" ry="39" transform={`rotate(${i * 5.625} 100 100)`} />)}
         </svg><b>cc.</b>
       </div></div>
-      <div className="study-slip" aria-live="polite" aria-atomic="true">
-        <div className="slip-mast"><Icon name="logo" size={17} /> cuenta.clara</div>
-        <div key={active} className="slip-content"><small>CAPA 0{active + 1} / 03</small><strong>{title}</strong><p>{note}</p></div>
-        <span className="slip-code" aria-hidden="true" />
+      <div className="study-receipt" data-layer={active}>
+        <div className="study-carbon" aria-hidden="true" />
+        <div className="study-stub" aria-hidden="true" />
+        <div className="study-fold" aria-hidden="true" />
+        <div className="study-slip" aria-live="polite" aria-atomic="true">
+          <div className="slip-mast"><Icon name="logo" size={17} /> cuenta.clara</div>
+          <div key={active} className="slip-content"><small>CAPA 0{active + 1} / 03</small><strong>{title}</strong><p>{note}</p></div>
+          <span className="slip-code" aria-hidden="true" />
+        </div>
       </div>
     </div>
     <div className="study-controls" role="group" aria-label="Capas de la cuenta">

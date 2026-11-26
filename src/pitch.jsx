@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { PageHeading } from './ui.jsx'
+import { PaperMargin, PaperPrint } from './paper-story.jsx'
 import './pitch.css'
 
 const opening = '¿Cuántas veces hemos consultado las reseñas de un establecimiento y aun así, nos hemos quedado con dudas?'
@@ -12,6 +13,7 @@ const paragraphs = [
   'Nuestra visión es convertirnos en el referente de consulta para las decisiones de consumo.',
   'Porque una calificación te dice qué tan satisfechos estuvieron los demás, pero Cuenta Clara te ayuda a saber qué esperar tú.',
 ]
+const paragraphStages = ['ticket', 'loop', 'stack', 'cut', 'filed']
 
 export function PitchPage() {
   const text = useRef(null)
@@ -44,7 +46,7 @@ export function PitchPage() {
     return () => window.clearInterval(timer)
   }, [phase])
 
-  return <article className="shell reading page-pad">
+  return <article className="shell pitch-page page-pad">
     <PageHeading label="CUENTA CLARA" title="Video promocional" />
     <video controls playsInline preload="metadata" className="w-full" aria-label="Video promocional de Cuenta Clara">
       <source src="/assets/pitch-hackathon.mp4" type="video/mp4" />
@@ -52,18 +54,26 @@ export function PitchPage() {
     </video>
     <section className="pitch" aria-labelledby="pitch-title">
       <h2 id="pitch-title" className="pitch-heading">El pitch de Cuenta Clara</h2>
-      <div className="pitch-text" data-phase={phase} ref={text}>
-        <p className="pitch-opening">
-          <strong className="pitch-opening-full">{opening}</strong>
-          {phase === 'typing' && <strong className="pitch-typing" aria-hidden="true">
-            {opening.slice(0, visibleCharacters)}
-          </strong>}
-        </p>
-        {paragraphs.map((paragraph, index) => (
-          <p key={paragraph} style={{ '--pitch-delay': `${index * 230}ms` }}>
-            {index === 4 || index === paragraphs.length - 1 ? <strong>{paragraph}</strong> : paragraph}
+      <div className="pitch-spread">
+        <div className="pitch-text" data-phase={phase} ref={text}>
+          <p className="pitch-opening">
+            <strong className="pitch-opening-full">{opening}</strong>
+            {phase === 'typing' && <strong className="pitch-typing" aria-hidden="true">
+              {opening.slice(0, visibleCharacters)}
+            </strong>}
           </p>
-        ))}
+          {paragraphs.map((paragraph, index) => (
+            <Fragment key={paragraph}>
+              {index === 0 && <PaperPrint stage="roll" />}
+              {index === 3 && <PaperPrint stage="stack" />}
+              {index === 5 && <PaperPrint stage="filed" />}
+              <p data-paper-stage={paragraphStages[index]} style={{ '--pitch-delay': `${index * 230}ms` }}>
+                {index === 4 || index === paragraphs.length - 1 ? <strong>{paragraph}</strong> : paragraph}
+              </p>
+            </Fragment>
+          ))}
+        </div>
+        <PaperMargin text={text} />
       </div>
     </section>
   </article>

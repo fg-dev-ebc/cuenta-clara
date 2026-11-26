@@ -39,11 +39,37 @@
 .plate-engraving { position: relative; width: 75%; aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; background: linear-gradient(145deg,#dfa6bc,#f6dce6 70%,#c792a8); box-shadow: inset 4px 6px 11px #955b745c, 1px 1px 1px #fff0f5; }
 .plate-engraving svg { width: 94%; color: #95526b; stroke-width: .7; }
 .plate-engraving b { position: absolute; font: italic 600 2rem Georgia,serif; color: #4a2937; }
+.study-receipt {
+  position: absolute; bottom: 8%; right: 5%; width: clamp(144px, 45%, 190px);
+  transform: rotate(8deg); isolation: isolate; filter: drop-shadow(3px 5px 0 #281c286b);
+}
 .study-slip {
-  position: absolute; bottom: 8%; right: 5%; width: clamp(144px, 45%, 190px); padding: .9rem 1rem 1.1rem;
-  color: #392530; background: #fff7f1; transform: rotate(8deg);
+  position: relative; padding: .9rem 1rem 1.1rem; color: #392530; background: #fff7f1;
   mask: linear-gradient(#000 0 0) top / 100% calc(100% - 5px) no-repeat, conic-gradient(from -45deg at bottom, #000 90deg, transparent 0) bottom / 10px 6px repeat-x;
 }
+.study-carbon,.study-stub,.study-fold { position: absolute; pointer-events: none; }
+.study-carbon {
+  inset: 2px; background: radial-gradient(circle,#61414e 1.4px,transparent 1.7px) 1px 3px / 8px 11px repeat-y, #cdaaba;
+}
+.study-receipt[data-layer="0"] .study-carbon { transform: translate(-8px,-7px); }
+.study-stub {
+  width: 40%; height: 38%; left: 2%; bottom: 12%; border: 1px dashed #674955;
+  background:
+    linear-gradient(var(--ink),var(--ink)) 37% center / 17px 3px no-repeat,
+    linear-gradient(var(--ink),var(--ink)) 30% center / 3px 17px no-repeat,
+    repeating-linear-gradient(90deg,transparent 0 2px,#704757 2px 3px) right 5px center / 9px 70% no-repeat,
+    var(--blush);
+}
+.study-receipt[data-layer="1"] .study-stub { transform: translateX(-100%); }
+.study-fold {
+  right: 99%; top: 12%; width: 49%; height: 69%; transform-origin: right center;
+  transform: perspective(350px) rotateY(175deg);
+  background:
+    repeating-linear-gradient(0deg,#866775 0 1px,transparent 1px 6px) center / 63% 47% no-repeat,
+    linear-gradient(90deg,#f7e8d8 70%,#d3b4b5);
+  clip-path: polygon(0 16%,20% 0,100% 0,100% 100%,0 100%);
+}
+.study-receipt[data-layer="2"] .study-fold { transform: perspective(350px) rotateY(16deg); }
 .slip-mast { display: flex; align-items: center; gap: .35rem; border-bottom: 1px dashed #946e80; padding-bottom: .5rem; font-weight: 740; letter-spacing: -.055em; }
 .slip-content { padding-block: .55rem; }
 .slip-content small { color: var(--wine); }
@@ -74,6 +100,7 @@
 @media (prefers-reduced-motion: no-preference) {
   .plate-engraving svg { animation: porcelain-turn 75s linear infinite; }
   .slip-content { animation: thermal-print .35s ease-out; }
+  .study-carbon,.study-stub,.study-fold { transition: transform .38s cubic-bezier(.2,.8,.2,1); }
 }
 @keyframes porcelain-turn { to { transform: rotate(1turn); } }
 @keyframes thermal-print { from { opacity: .45; translate: 0 -4px; } }
@@ -87,5 +114,6 @@
   .editorial .hero h1 { font-size: clamp(2.95rem,12.4vw,3.5rem); }
   .study-controls small,.edition-strip > span { display: none; }
   .still-life { height: 195px; }
-  .study-slip { right: 1%; bottom: 3%; padding: .65rem .75rem .85rem; }
+  .study-receipt { right: 1%; bottom: 3%; }
+  .study-slip { padding: .65rem .75rem .85rem; }
 }

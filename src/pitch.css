@@ -1,3 +1,5 @@
+.pitch-page > :is(.folio-heading, video) { max-width: 760px; margin-inline: auto; }
+.pitch-page video { display: block; }
 .pitch {
   margin-top: 2.5rem;
   padding-top: 1.5rem;
@@ -16,6 +18,60 @@
 }
 .pitch-opening { position: relative; }
 .pitch-typing { display: none; }
+
+.paper-frame {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  pointer-events: none;
+  border: 1px solid #705661;
+  background: radial-gradient(#f4cddc24 .8px, transparent 1px) 0 0 / 12px 12px, #30262e;
+}
+.paper-frame::before, .paper-frame canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.paper-frame::before { content: ''; background: var(--paper-print) center / contain no-repeat; }
+.paper-frame:has(canvas[data-ready])::before { visibility: hidden; background-image: none; }
+.paper-frame canvas { visibility: hidden; }
+.paper-frame canvas[data-ready] { visibility: visible; }
+.paper-frame::after {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  background:
+    linear-gradient(var(--blush), var(--blush)) top left / 15px 1px,
+    linear-gradient(var(--blush), var(--blush)) top left / 1px 15px,
+    linear-gradient(var(--blush), var(--blush)) bottom right / 15px 1px,
+    linear-gradient(var(--blush), var(--blush)) bottom right / 1px 15px;
+  background-repeat: no-repeat;
+}
+.paper-margin { display: none; }
+.paper-inline { height: clamp(9rem, 37vw, 15rem); margin: 1.4rem 0; }
+.paper-register { position: absolute; bottom: 13px; left: 13px; display: flex; gap: 4px; }
+.paper-register i { width: 12px; height: 4px; background: #826575; }
+.paper-register i[data-current] { background: var(--blush); }
+@media (min-width: 820px) {
+  .pitch-spread {
+    display: grid;
+    grid-template-columns: minmax(0, 1.38fr) minmax(0, 1fr);
+    align-items: start;
+    gap: clamp(2rem, 5vw, 5.5rem);
+  }
+  .pitch-text p { margin-block: clamp(1.6rem, 4vh, 3rem); }
+  .paper-inline { display: none; }
+  .paper-margin {
+    display: block;
+    position: sticky;
+    top: 12vh;
+    width: min(100%, 66vh);
+    justify-self: end;
+    aspect-ratio: 1;
+    margin-top: 1.6rem;
+  }
+}
 
 @media (prefers-reduced-motion: no-preference) {
   .pitch-text[data-phase="waiting"] p,
