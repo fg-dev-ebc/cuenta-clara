@@ -55,7 +55,8 @@ function App() {
       </Route>
       <Route path="/terminos" element={<Legal />} />
       <Route path="/privacidad" element={<Legal privacy />} />
-      <Route path="/pitch-hackaton" element={<PitchPage />} />
+      <Route path="/pitch-hackathon" element={<PitchPage />} />
+      <Route path="/pitch-hackaton" element={<Navigate replace to="/pitch-hackathon" />} />
       <Route path="*" element={<div className="shell page-pad"><Empty title="Página no encontrada"><Link className="inline-link" to="/">Volver al inicio →</Link></Empty></div>} />
     </Routes></main>
     <Footer />
