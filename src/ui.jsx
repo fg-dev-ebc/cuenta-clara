@@ -27,7 +27,7 @@ export function Icon({ name, size = 18, ...props }) {
 }
 
 export function Brand() {
-  return <Link className="brand" to="/" aria-label="Cuenta Clara, inicio"><span className="brand-mark"><Icon name="logo" size={20} /></span><span>cuenta<span className="brand-divider">.</span>clara</span></Link>
+  return <Link className="brand" to="/" aria-label="Cuenta Clara, inicio"><img className="brand-mark" src="/favicon.svg" alt="" width="32" height="32" /><span>cuenta<span className="brand-divider">.</span>clara</span></Link>
 }
 
 export function Header() {
@@ -65,10 +65,10 @@ export function Header() {
       <Brand />
       <div className="header-end">
         <button className="icon-button mobile-menu" type="button" aria-label={open ? 'Cerrar menú' : 'Abrir menú'} aria-expanded={open} aria-controls="nav"
-          onClick={() => { if (profile.current) profile.current.open = false; setOpen(!open) }}><Icon name={open ? 'close' : 'menu'} /></button>
+          onClick={() => { if (profile.current) profile.current.open = false; setOpen(!open) }}>Menú <Icon name={open ? 'close' : 'menu'} size={16} /></button>
         <nav id="nav" className={`nav ${open ? 'is-open' : ''}`} aria-label="Principal">
-          <NavLink to="/establecimientos">Explorar</NavLink>
-          {user ? <NavLink to="/mis-aportaciones">Mis aportaciones</NavLink> : <NavLink to="/login">Iniciar sesión</NavLink>}
+          <NavLink to="/establecimientos"><small aria-hidden="true">01</small> Explorar</NavLink>
+          {user ? <NavLink to="/mis-aportaciones"><small aria-hidden="true">02</small> Mis aportaciones</NavLink> : <NavLink to="/login"><small aria-hidden="true">02</small> Iniciar sesión</NavLink>}
           <Link className="button button-dark header-cta" to="/publicar"><Icon name="plus" size={16} /> Publicar</Link>
         </nav>
         {user && <details className="account-menu" ref={profile} onToggle={(event) => {
@@ -102,11 +102,23 @@ export function Header() {
 export function Footer() {
   return <footer className="site-footer">
     <div className="shell footer-content">
-      <div><Brand /><p>Información clara antes de ir.</p></div>
-      <div className="footer-links"><Link to="/establecimientos">Explorar</Link><Link to="/terminos">Términos</Link><Link to="/privacidad">Privacidad</Link></div>
-      <span className="mono footer-note">DIRECTORIO COLABORATIVO<span className="terminal-dot" /></span>
+      <div className="colophon"><p>Datos,<br /><em>no estrellas.</em></p></div>
+      <nav aria-label="Pie de página" className="footer-index">
+        <span className="eyebrow">ÍNDICE DE LA GUÍA</span>
+        {[['Explorar establecimientos','/establecimientos'],['Escribir una reseña','/publicar'],['Términos de uso','/terminos'],['Privacidad','/privacidad']].map(([label, to], i) =>
+          <Link to={to} key={to}><small aria-hidden="true">0{i + 1}</small>{label}<Icon name="arrow" size={16} /></Link>)}
+      </nav>
+      <div className="footer-imprint"><Brand /><span className="mono footer-note">DIRECTORIO COLABORATIVO</span><span className="imprint-barcode" aria-hidden="true" /></div>
     </div>
   </footer>
+}
+
+export function PageHeading({ label, title }) {
+  const split = title.lastIndexOf(' ') + 1
+  return <header className="folio-heading">
+    <span className="eyebrow">{label}</span>
+    <h1 className="page-title">{title.slice(0, split)}<em>{title.slice(split)}</em></h1>
+  </header>
 }
 
 export function SectionHead({ number, title, description, icon, action }) {

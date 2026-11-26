@@ -3,7 +3,7 @@ import { Link, NavLink, Outlet, useParams, useSearchParams } from 'react-router'
 import { LiveRefresh, useAuth, useResource } from './client.jsx'
 import { ReviewContents } from './directory.jsx'
 import { BranchFields, branchFieldsFrom, BranchPicker, kindLabels, PlacesAttribution, PlaceSummary } from './publish.jsx'
-import { Badge, displayDate, Empty, goBranch, Pagination, Status, statuses } from './ui.jsx'
+import { Badge, displayDate, Empty, goBranch, PageHeading, Pagination, Status, statuses } from './ui.jsx'
 
 const sections = [
   ['dashboard', 'Resumen'], ['establecimientos', 'Establecimientos'], ['solicitudes', 'Solicitudes'],
@@ -20,7 +20,7 @@ export function AdminLayout() {
 }
 
 function AdminTitle({ title, description }) {
-  return <><h1 className="page-title">{title}</h1>{description && <p className="lede">{description}</p>}</>
+  return <><PageHeading label="CC / OPERACIONES" title={title} />{description && <p className="lede">{description}</p>}</>
 }
 
 function Table({ headings, children }) {

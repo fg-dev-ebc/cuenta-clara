@@ -2,6 +2,9 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
 import { api, LiveRefresh, useAuth, useResource } from './client.jsx'
 import { Avatar, Badge, currency, displayDate, Empty, goBranch, Icon, imageUrl, MessageForm, Pagination, SectionHead, Status } from './ui.jsx'
+import './directory-motion.css'
+import { TextGenerate } from './motion-ui.jsx'
+import './editorial.css'
 
 function SearchBar({ initial = '', onSearch, hero = false }) {
   return <form className={`search-bar ${hero ? 'search-hero' : ''}`} role="search" onSubmit={(event) => {
@@ -15,25 +18,32 @@ function SearchBar({ initial = '', onSearch, hero = false }) {
   </form>
 }
 
+const layers = [
+  ['Precios', 'Lo anunciado', '¿Coincidió el precio de la carta con el de la cuenta?'],
+  ['Cargos', 'Los extras', '¿Hubo algún cargo que no esperabas encontrar?'],
+  ['Condiciones', 'La letra chica', '¿Qué condiciones te explicaron antes de pedir?'],
+]
+
 function Receipt() {
-  return <div className="receipt-canvas" aria-hidden="true">
-    <span className="canvas-caption eyebrow">FIG. 01 / LA CUENTA</span>
-    <span className="canvas-cross a">+</span><span className="canvas-cross b">+</span>
-    <div className="receipt">
-      <div className="receipt-icon"><Icon name="logo" size={24} /></div>
-      <strong>cuenta.clara</strong>
-      <span className="receipt-sub">ANTES DE IR</span>
-      <div className="receipt-rule" />
-      <div className="receipt-rows">
-        <span>01 / PRECIOS</span><span>···</span>
-        <span>02 / CONDICIONES</span><span>···</span>
-        <span>03 / CONTEXTO</span><span>···</span>
+  const [active, select] = useState(0)
+  const [, title, note] = layers[active]
+  return <section className="table-study" aria-label="Explora las capas de una cuenta">
+    <div className="still-life">
+      <div aria-hidden="true" className="table-plate"><div className="plate-engraving">
+        <svg viewBox="0 0 200 200" fill="none" stroke="currentColor">
+          {Array.from({ length: 32 }, (_, i) => <ellipse key={i} cx="100" cy="100" rx="85" ry="39" transform={`rotate(${i * 5.625} 100 100)`} />)}
+        </svg><b>cc.</b>
+      </div></div>
+      <div className="study-slip" aria-live="polite" aria-atomic="true">
+        <div className="slip-mast"><Icon name="logo" size={17} /> cuenta.clara</div>
+        <div key={active} className="slip-content"><small>CAPA 0{active + 1} / 03</small><strong>{title}</strong><p>{note}</p></div>
+        <span className="slip-code" aria-hidden="true" />
       </div>
-      <div className="receipt-rule" />
-      <div className="receipt-bottom"><span>INFORMACIÓN</span><span className="barcode" /></div>
     </div>
-    <span className="canvas-footer">DATOS, NO ESTRELLAS.</span>
-  </div>
+    <div className="study-controls" role="group" aria-label="Capas de la cuenta">
+      {layers.map(([label], i) => <button type="button" key={label} aria-pressed={active === i} onClick={() => select(i)}><small>0{i + 1}</small> {label}</button>)}
+    </div>
+  </section>
 }
 
 function CategoriesNav({ resource }) {
@@ -127,18 +137,19 @@ export function DirectoryPage({ home = false }) {
   const highlights = useResource(home ? '/highlights' : null)
   const refresh = useCallback(() => { resource.refresh(); highlights.refresh(); categories.refresh() }, [resource.refresh, highlights.refresh, categories.refresh])
 
-  return <div className="shell">
+  return <div className="shell editorial">
     <LiveRefresh channel="directory" onRefresh={refresh} />
     {home && <>
       <section className="hero">
         <div className="hero-copy">
-          <div className="hero-marker"><span className="terminal-dot" /> DIRECTORIO DE EXPERIENCIAS</div>
-          <h1>Información clara.<br /><span>Antes de ir.</span></h1>
-          <p>Precios, cargos y condiciones que otras personas encontraron. Consulta experiencias reales, organizadas por sucursal.</p>
+          <div className="hero-marker"><span className="terminal-dot" /> GUÍA DE CAMPO / RESTAURANTES</div>
+          <h1>La letra chica,<br /><em>a la vista.</em></h1>
+          <p><TextGenerate>Precios, cargos y condiciones que otras personas encontraron. Consulta experiencias reales, organizadas por sucursal.</TextGenerate></p>
           <SearchBar hero onSearch={(q) => navigate(q ? `/establecimientos?q=${encodeURIComponent(q)}` : '/establecimientos')} />
         </div>
         <Receipt />
       </section>
+      <div className="edition-strip"><b>CC / ARCHIVO</b><span>Experiencias por sucursal</span><a href="#directorio">Ir al índice ↓</a></div>
       <CategoriesNav resource={categories} />
       <Highlights resource={highlights} />
     </>}

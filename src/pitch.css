@@ -1,0 +1,36 @@
+.pitch {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+}
+
+.pitch-heading { font-size: 1.5rem; font-weight: 700; }
+.pitch-text { font-family: var(--font-mono); line-height: 1.75; }
+.pitch-text p { margin-block: 1.25rem; }
+.pitch-text p:has(> strong):not(.pitch-opening) {
+  margin-block: 2rem;
+  padding-inline-start: 1rem;
+  border-inline-start: 3px solid currentColor;
+  font-size: 1.125rem;
+  line-height: 1.5;
+}
+.pitch-opening { position: relative; }
+.pitch-typing { display: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .pitch-text[data-phase="waiting"] p,
+  .pitch-text[data-phase="typing"] p:not(.pitch-opening),
+  .pitch-text[data-phase="typing"] .pitch-opening-full { opacity: 0; }
+
+  .pitch-typing { display: block; position: absolute; inset: 0; }
+  .pitch-typing::after { content: "▍"; }
+
+  .pitch-text[data-phase="revealing"] p:not(.pitch-opening) {
+    animation: pitch-reveal 400ms ease-out var(--pitch-delay) both;
+  }
+
+  @keyframes pitch-reveal {
+    from { opacity: 0; transform: translateY(.6rem); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}

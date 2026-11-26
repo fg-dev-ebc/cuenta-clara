@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es" data-resolution="landscape">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=1920,height=1080">
+  <title>Cuenta Clara · Antes de pedir</title>
+  <link rel="stylesheet" href="guide.css"><script src="assets/gsap.min.js"></script>
+</head>
+<body>
+<main id="root" data-composition-id="main" data-width="1920" data-height="1080" data-fps="30" data-start="0" data-duration="24">
+  <div id="stage" class="clip" data-start="0" data-duration="24" data-track-index="0" data-track-kind="graphics" data-layout-allow-overlap>
+    <header><img src="assets/brand.svg" width="57" height="57" alt=""> cuenta.clara <small>GUÍA DE CAMPO</small></header>
+    <div class="rail"><span id="progress"></span></div>
+    <section id="one" class="copy"><label>01 / BUSCA</label><h1>Empieza por<br><em>tu zona.</em></h1><p>Escribe el nombre del restaurante,<br>la sucursal o el barrio.</p>
+      <div class="query"><b>⌕</b><span id="typed">Centro</span><i></i><strong>Buscar →</strong></div>
+    </section>
+    <section id="two" class="copy"><label>02 / ELIGE</label><h1>Un nombre.<br><em>Una sucursal.</em></h1><p>Comprueba la zona y la dirección<br>antes de abrir la ficha.</p></section>
+    <section id="three" class="copy"><label>03 / CONSULTA</label><h1>Lee la<br><em>letra chica.</em></h1><p>Compara lo anunciado con lo que<br>otras personas encontraron.</p></section>
+    <div id="atlas" data-layout-allow-overlap><div class="atlas-head">CENTRO <span>PLANO ILUSTRATIVO</span></div>
+      <svg viewBox="0 0 760 540" aria-hidden="true">
+        <defs>
+          <pattern id="blocks" width="112" height="87" patternUnits="userSpaceOnUse" patternTransform="rotate(-12 380 270)">
+            <rect x="5" y="5" width="99" height="75" rx="10" fill="#453640" stroke="#755b69" stroke-width="2"/>
+            <path d="M52 6v74M6 46h46" fill="none" stroke="#644c59"/>
+          </pattern>
+        </defs>
+        <rect width="760" height="540" fill="url(#blocks)"/>
+        <path d="M-40 460Q150 490 250 320T565 210T800 50" fill="none" stroke="#2a2028" stroke-width="46"/>
+        <path d="M-40 460Q150 490 250 320T565 210T800 50" fill="none" stroke="#aa8094" stroke-width="2" stroke-dasharray="8 9"/>
+        <g fill="#e7c3d3"><circle cx="154" cy="359" r="8"/><circle cx="422" cy="348" r="8"/><circle cx="278" cy="140" r="8"/></g>
+        <path id="route" d="M115 436L180 421Q193 418 201 400L248 308Q254 297 272 293L415 260Q430 256 433 244L452 180Q456 170 468 166L565 146" fill="none" stroke="#f4cddc" stroke-width="8" stroke-linecap="round" pathLength="1" stroke-dasharray="1"/>
+        <g id="pin"><circle cx="565" cy="146" r="45" fill="#f4cddc" opacity=".18"/><circle cx="565" cy="146" r="21" fill="#f4cddc"/><circle cx="565" cy="146" r="8" fill="#241e24"/></g>
+        <circle id="traveler" r="10" fill="#fff8f4"/>
+      </svg>
+    </div>
+    <article id="ticket" data-layout-allow-overlap>
+      <div class="serial">CUENTA CLARA <span>FICHA DE EJEMPLO</span></div>
+      <h2>Mesa Nueve</h2><p>Sucursal Centro · Calle Olmo 12</p>
+      <div class="rule"></div>
+      <div class="entry"><small>01</small><div><b>Precios</b><span>¿Coincidió el precio con la carta?</span></div></div>
+      <div class="entry"><small>02</small><div><b>Cargos</b><span>¿Se añadió algún extra?</span></div></div>
+      <div class="entry"><small>03</small><div><b>Condiciones</b><span>¿Te avisaron antes de pedir?</span></div></div>
+      <div class="barcode"></div>
+    </article>
+    <div id="last"><label>CUENTA CLARA</label><h1>Datos,<br><em>no estrellas.</em></h1><p>Explora el directorio antes de ir.</p><img src="assets/brand.svg" width="132" height="132" alt=""></div>
+    <footer><span>ANTES DE PEDIR</span><span>BUSCA &nbsp; → &nbsp; ELIGE &nbsp; → &nbsp; CONSULTA</span></footer>
+  </div>
+  <audio id="score" src="assets/pulso.wav" data-start="0" data-duration="24" data-track-index="1"></audio>
+</main>
+<script>
+const tl = gsap.timeline({paused:true, defaults:{ease:'power3.inOut'}});
+const path = document.querySelector('#route');
+const journey={p:0}, length=path.getTotalLength();
+function trace(){const pt=path.getPointAtLength(journey.p*length); gsap.set('#traveler',{attr:{cx:pt.x,cy:pt.y}})}
+trace();
+gsap.set(['#two','#three','#last'],{opacity:0});
+gsap.set('#ticket',{scale:.08,x:250,y:-145,opacity:0,rotation:8});
+gsap.set('.entry',{opacity:0,x:-18});
+tl.from('#one',{y:45,opacity:0,duration:.65},0)
+  .from('#atlas',{scale:.86,rotation:-5,opacity:.1,duration:1.15},0)
+  .from('#typed',{clipPath:'inset(0 100% 0 0)',duration:1.3,ease:'steps(6)'},1.05)
+  .fromTo('#route',{strokeDashoffset:1},{strokeDashoffset:0,duration:4.2,ease:'sine.inOut'},2.8)
+  .to(journey,{p:1,duration:4.2,ease:'sine.inOut',onUpdate:trace},2.8)
+  .from('#pin',{svgOrigin:'565 146',scale:0,duration:.65,ease:'back.out(1.5)'},6.6)
+  .to('#one',{opacity:0,y:-35,duration:.42},6.35)
+  .fromTo('#two',{opacity:0,y:40},{opacity:1,y:0,duration:.65},6.78)
+  .to('#atlas',{scale:1.12,opacity:0,duration:1},8.35)
+  .to('#ticket',{scale:1,rotation:0,x:0,y:0,opacity:1,duration:1.05},8.35)
+  .from('.rule',{scaleX:0,transformOrigin:'left',duration:.75},9.45)
+  .to('#two',{opacity:0,y:-35,duration:.45},11.55)
+  .fromTo('#three',{opacity:0,y:40},{opacity:1,y:0,duration:.6},11.97)
+  .to('.entry',{x:0,opacity:1,stagger:1.45,duration:.55},12.35)
+  .from('.barcode',{scaleX:0,transformOrigin:'left',duration:.8},16.65)
+  .to('#ticket',{y:-650,rotation:-8,opacity:0,duration:.85},18.9)
+  .to('#three',{y:-50,opacity:0,duration:.55},18.95)
+  .fromTo('#last',{opacity:0,scale:.94},{opacity:1,scale:1,duration:.9},19.48)
+  .from('#last img',{rotation:-30,y:40,duration:.85},19.7)
+  .fromTo('#progress',{scaleX:0},{scaleX:1,transformOrigin:'left',duration:24,ease:'none'},0);
+window.__timelines ||= {}; window.__timelines.main=tl;
+</script>
+</body></html>

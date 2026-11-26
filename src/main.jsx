@@ -8,13 +8,14 @@ import { Services } from './client.jsx'
 import { AuthPage, MyContributions, PrivatePage, ProfilePage } from './account.jsx'
 import { AdminBranches, AdminCategories, AdminLayout, AdminModeration, AdminRequest, AdminRequests, Dashboard } from './admin.jsx'
 import { BranchPage, DirectoryPage } from './directory.jsx'
+import { PitchPage } from './pitch.jsx'
 import { PublishPage, RequestPage } from './publish.jsx'
-import { Empty, Footer, Header } from './ui.jsx'
+import { Empty, Footer, Header, PageHeading } from './ui.jsx'
+import './site-theme.css'
 
 function Legal({ privacy = false }) {
   return <article className="shell reading page-pad legal">
-    <span className="eyebrow">CUENTA CLARA / INFORMACIÓN</span>
-    <h1 className="page-title">{privacy ? 'Privacidad' : 'Términos de uso'}</h1>
+    <PageHeading label="CUENTA CLARA / INFORMACIÓN" title={privacy ? 'Privacidad' : 'Términos de uso'} />
     {privacy ? <>
       <p>Para crear una cuenta, Neon Auth procesa tu correo electrónico y tus credenciales. Si eliges entrar con Google, Google y Neon Auth procesan el acceso. Junto a tus reseñas públicas se muestran tu alias y, si la agregas, tu foto, no tu correo.</p>
       <p>Las reseñas publicadas y sus imágenes se muestran en el directorio. Las solicitudes pendientes o rechazadas y los motivos de moderación solo están disponibles para las personas autorizadas.</p>
@@ -54,6 +55,7 @@ function App() {
       </Route>
       <Route path="/terminos" element={<Legal />} />
       <Route path="/privacidad" element={<Legal privacy />} />
+      <Route path="/pitch-hackaton" element={<PitchPage />} />
       <Route path="*" element={<div className="shell page-pad"><Empty title="Página no encontrada"><Link className="inline-link" to="/">Volver al inicio →</Link></Empty></div>} />
     </Routes></main>
     <Footer />

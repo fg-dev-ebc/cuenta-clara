@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, Navigate, useLocation, useSearchParams } from 'react-router'
 import { useAuth, useResource } from './client.jsx'
-import { Avatar, Badge, displayDate, Empty, goBranch, MessageForm, Pagination, Status, statuses } from './ui.jsx'
+import { Avatar, Badge, displayDate, Empty, goBranch, MessageForm, PageHeading, Pagination, Status, statuses } from './ui.jsx'
 import { mediaTypes, uploadImage, validImage } from './uploads.js'
 import googleMark from './google-signin-mark.png'
 
@@ -98,8 +98,7 @@ export function AuthPage({ register = false }) {
   }
 
   return <div className="shell narrow page-pad">
-    <span className="eyebrow">CUENTA CLARA / ACCESO</span>
-    <h1 className="page-title">{step === 'verify' ? 'Verifica tu correo' : step === 'register' ? 'Crea tu cuenta' : 'Inicia sesión'}</h1>
+    <PageHeading label="CUENTA CLARA / ACCESO" title={step === 'verify' ? 'Verifica tu correo' : step === 'register' ? 'Crea tu cuenta' : 'Inicia sesión'} />
     <p className="lede">{step === 'verify' ? `Ingresa el código enviado a ${email}.` : 'Puedes consultar el directorio sin cuenta. Inicia sesión para compartir una experiencia.'}</p>
     {loading ? <p className="loading mono">Cargando…</p> : !client ? <p className="notice" role="alert">El acceso a cuentas no está disponible.</p> :
       <form className="form-panel" key={step} onSubmit={submit}>
@@ -180,8 +179,7 @@ function ProfileForm({ account, email, request, refresh }) {
 export function ProfilePage() {
   const { user, account, accountLoading, accountError, refreshAccount, request } = useAuth()
   return <div className="shell reading page-pad">
-    <span className="eyebrow">MI CUENTA</span>
-    <h1 className="page-title">Mi perfil</h1>
+    <PageHeading label="MI CUENTA / IDENTIDAD" title="Mi perfil" />
     <p className="lede">Tu alias y tu foto acompañan tus reseñas. Puedes cambiarlos cuando quieras.</p>
     <Status resource={{ loading: accountLoading, error: accountError, data: account, refresh: refreshAccount }}>
       {account && <ProfileForm key={account.id} account={account} email={user?.email} request={request} refresh={refreshAccount} />}
@@ -210,8 +208,7 @@ export function MyContributions() {
   const [params, setParams] = useSearchParams()
   const list = useResource(`/account/contributions?page=${encodeURIComponent(params.get('page') ?? '1')}`, request)
   return <div className="shell reading page-pad">
-    <span className="eyebrow">MI CUENTA</span>
-    <h1 className="page-title">Mis aportaciones</h1>
+    <PageHeading label="MI CUENTA / ARCHIVO" title="Mis aportaciones" />
     <p className="lede">Consulta tus reseñas, solicitudes de alta y el estado de tus correcciones.</p>
     <Status resource={list}>
       {list.data?.items.length ? <div className="reviews">{list.data.items.map((item) => <Contribution key={item.id} item={item} request={request} />)}</div>

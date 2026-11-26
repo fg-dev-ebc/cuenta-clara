@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import { useAuth, useConfig, useResource } from './client.jsx'
-import { Badge, Empty, goBranch, Icon, Pagination, Status } from './ui.jsx'
+import { Badge, Empty, goBranch, Icon, PageHeading, Pagination, Status } from './ui.jsx'
 import { mediaTypes, uploadImage, validImage } from './uploads.js'
 import mapsLogo from './GoogleMaps_Logo_DarkGray.svg'
 
@@ -140,8 +140,7 @@ export function PublishPage() {
   const slug = params.get('branch')
   const branch = useResource(slug ? `/branches/${encodeURIComponent(slug)}` : null)
   return <div className="shell reading page-pad">
-    <span className="eyebrow">APORTAR / EXPERIENCIA</span>
-    <h1 className="page-title">Escribir reseña</h1>
+    <PageHeading label="APORTAR / EXPERIENCIA" title="Escribir reseña" />
     <p className="lede">Comparte información específica sobre una visita, sin calificar al restaurante.</p>
     {!slug ? <>
       <BranchPicker onSelect={(item) => setParams({ branch: item.slug })} />
@@ -193,8 +192,7 @@ export function RequestPage() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   return <div className="shell reading page-pad">
-    <span className="eyebrow">APORTAR / ALTA DE SUCURSAL</span>
-    <h1 className="page-title">Proponer un establecimiento</h1>
+    <PageHeading label="APORTAR / ALTA DE SUCURSAL" title="Proponer un establecimiento" />
     <p className="lede">Escribe tu primera reseña ahora. La verás publicada al aprobarse la ficha de esta sucursal.</p>
     <section className="google-panel">
       <h2>Buscar en Google Places</h2>
