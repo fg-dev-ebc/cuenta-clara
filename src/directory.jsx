@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate, useNavigationType, useParams, useSearchParams } from 'react-router'
 import { api, LiveRefresh, useAuth, useResource } from './client.jsx'
-import { Avatar, Badge, currency, displayDate, Empty, goBranch, Icon, imageUrl, MessageForm, Pagination, SectionHead, Status } from './ui.jsx'
+import { Avatar, Badge, BrandMark, currency, displayDate, Empty, goBranch, Icon, imageUrl, MessageForm, Pagination, SectionHead, Status } from './ui.jsx'
 import './directory-motion.css'
 import { TextGenerate } from './motion-ui.jsx'
 import './editorial.css'
@@ -37,7 +37,7 @@ function Receipt() {
         <div className="study-stub" aria-hidden="true" />
         <div className="study-fold" aria-hidden="true" />
         <div className="study-slip" aria-live="polite" aria-atomic="true">
-          <div className="slip-mast"><Icon name="logo" size={17} /> cuenta.clara</div>
+          <div className="slip-mast"><BrandMark size={17} /> cuenta.clara</div>
           <div key={active} className="slip-content"><small>CAPA 0{active + 1} / 03</small><strong>{title}</strong><p>{note}</p></div>
           <span className="slip-code" aria-hidden="true" />
         </div>

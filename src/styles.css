@@ -43,9 +43,11 @@ img { max-width: 100%; }
 .site-header { background: var(--white); border-bottom: 1px solid var(--line); }
 .header-inner { min-height: 67px; display: flex; justify-content: space-between; align-items: center; gap: 1rem; position: relative; }
 .header-end { display: flex; align-items: center; gap: .8rem; }
-.brand { display: inline-flex; align-items: center; gap: .55rem; font-weight: 760; font-size: 1.27rem; letter-spacing: -.075em; white-space: nowrap; }
-.brand-mark { display: grid; place-items: center; width: 31px; height: 31px; background: var(--black); color: var(--white); border-radius: 5px; }
-.brand-divider { margin-inline: .04em; }
+.brand { display: inline-flex; align-items: center; gap: .4rem; font-size: 1.35rem; white-space: nowrap; }
+.brand-mark { display: block; flex: none; }
+.brand-wordmark { font-weight: 680; line-height: 1; letter-spacing: -.065em; }
+.brand-tail { font: italic 500 1.12em/1 Georgia,serif; letter-spacing: -.065em; }
+.brand-divider { margin-inline: .035em; }
 .nav { display: flex; align-items: center; gap: clamp(.8rem, 2.7vw, 2.15rem); color: var(--charcoal); font-size: .88rem; font-weight: 550; }
 .nav a:not(.button):hover, .nav a.active { text-decoration: underline; text-underline-offset: .38em; }
 .mobile-menu { display: none !important; }

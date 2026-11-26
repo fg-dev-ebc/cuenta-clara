@@ -37,7 +37,6 @@ body {
 .nav small { color: var(--blush); }
 .nav a.active:not(.button) { text-decoration-thickness: 2px; text-underline-offset: .42em; }
 .header-cta { border-radius: 100px; padding-inline: 1.15rem; }
-.brand-mark { display: block; border-radius: 22%; }
 .brand-divider,.nav a.active:not(.button) { color: var(--blush); }
 .button-dark,.editorial .search-hero .button,.admin-layout aside nav a.active {
   color: var(--ink); background: var(--blush); border-color: #dbaabb;
@@ -186,7 +185,6 @@ input[type="checkbox"] { accent-color: var(--wine); }
 .footer-imprint .engraving { margin-inline-start: auto; width: 2.3rem; color: var(--wine); }
 .imprint-barcode { width: 85px; height: 20px; background: repeating-linear-gradient(90deg,var(--ink) 0 1px,transparent 1px 3px,var(--ink) 3px 6px,transparent 6px 8px); }
 .footer-imprint .brand-divider { color: var(--wine); }
-.footer-imprint .brand-mark { outline: 1px solid #684352; }
 @media (max-width:640px) {
   .branch-header { grid-template-columns: minmax(0,1fr); gap: .9rem; }
   .branch-photo { width: 4.75rem; padding: .2rem; }

@@ -3,7 +3,6 @@ import { Link, NavLink, useLocation } from 'react-router'
 import { useAuth } from './client.jsx'
 
 const paths = {
-  logo: 'M4 3h16v18l-4-2-4 2-4-2-4 2V3Zm4 5h8m-8 4h8m-8 4h4',
   search: 'M21 21l-5-5m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z',
   arrow: 'M4 12h15m-6-6 6 6-6 6',
   diagonal: 'M6 18 18 6M8 6h10v10',
@@ -26,8 +25,15 @@ export function Icon({ name, size = 18, ...props }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}><path d={paths[name] || paths.list} /></svg>
 }
 
+export function BrandMark({ size = 32 }) {
+  return <img className="brand-mark" src="/favicon.svg" alt="" width={size} height={size} />
+}
+
 export function Brand() {
-  return <Link className="brand" to="/" aria-label="Cuenta Clara, inicio"><img className="brand-mark" src="/favicon.svg" alt="" width="32" height="32" /><span>cuenta<span className="brand-divider">.</span>clara</span></Link>
+  return <Link className="brand" to="/" aria-label="Cuenta Clara, inicio">
+    <BrandMark />
+    <span className="brand-wordmark">cuenta<span className="brand-divider">.</span><span className="brand-tail">clara</span></span>
+  </Link>
 }
 
 export function Header() {
