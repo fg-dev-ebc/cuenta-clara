@@ -225,6 +225,28 @@ function ReviewCard({ review }) {
   </article>
 }
 
+function LocalReviewThread({ branch }) {
+  return <article className="review-card verification-demo">
+    <header className="review-head">
+      <div className="demo-signer">
+        <Avatar alias="Carlos M." /><h3>Carlos M.</h3>
+        <span className="verification-seal email-seal"><span aria-hidden="true">✓</span>Correo verificado</span>
+      </div>
+      <Badge>Higiene</Badge>
+    </header>
+    <p className="review-body">El pasado sábado, alrededor de las 15:30, encontré una cucaracha en mi plato de pozole. Me parece inaceptable que un establecimiento opere en estas condiciones.</p>
+    <section className="demo-reply" aria-labelledby="official-reply">
+      <div className="demo-signer">
+        <strong>{branch.name} · {branch.branch_name}</strong>
+        <span className="verification-seal branch-seal"><span aria-hidden="true">✓</span>Establecimiento verificado</span>
+      </div>
+      <h4 id="official-reply" className="eyebrow">Respuesta oficial del establecimiento</h4>
+      <p className="review-body">Hola, Carlos. Hemos revisado las grabaciones de nuestras cámaras de seguridad correspondientes a la fecha y hora que mencionas. Las imágenes muestran que tú mismo colocaste el insecto en el plato.</p>
+      <p className="review-body">Contamos con evidencia audiovisual de lo ocurrido y la hemos puesto a disposición de Cuenta Clara. Rechazamos categóricamente las afirmaciones de tu reseña.</p>
+    </section>
+  </article>
+}
+
 function BranchHeading({ branch, siblings = [], origin }) {
   const navigate = useNavigate()
   const header = useRef(null)
@@ -311,6 +333,9 @@ export function BranchPage() {
             {items.length ? <div className="reviews">{items.map((review) => <ReviewCard key={review.id} review={review} />)}</div>
               : <Empty description="No hay aportaciones para la selección actual. Esto no indica que no existan cargos o condiciones." />}
             <Pagination {...resource.data} onPage={(page) => update({ page })} />
+            {import.meta.env.DEV && window.location.hostname === 'localhost' &&
+              branch.slug === 'la-casa-de-tono-zona-rosa-49dfffb5' && !params.size &&
+              <div className="local-review-thread"><LocalReviewThread branch={branch} /></div>}
           </section>
         </>
       })()}
