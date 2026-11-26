@@ -110,7 +110,7 @@ input[type="checkbox"] { accent-color: var(--wine); }
   background: conic-gradient(from -45deg at bottom,#f5e6e9 90deg,transparent 0) 0 0 / 8px 4px repeat-x;
 }
 .review-meta { padding-top: .6rem; color: var(--mid); font-variant-numeric: tabular-nums; }
-.local-review-thread { margin-top: .7rem; }
+.verification-demo { margin-top: .7rem; }
 .verification-demo .review-body { max-width: 74ch; }
 .verification-demo .demo-signer { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .65rem; color: var(--ink); }
 .verification-seal { display: inline-flex; align-items: center; gap: .45em; font: 600 .75rem/1.4 var(--font-mono); }
