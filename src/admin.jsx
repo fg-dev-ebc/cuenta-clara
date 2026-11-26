@@ -73,7 +73,9 @@ export function Dashboard() {
     <AdminTitle title="Resumen" description="Actividad del directorio y solicitudes por revisar." />
     <LiveRefresh channel="admin" privileged onRefresh={resource.refresh} />
     <Status resource={resource}>{resource.data && <>
-      <div className="metrics">{Object.entries(labels).map(([key, label]) => <div key={key}><span className="mono">{resource.data.metrics[key]}</span><p>{label}</p></div>)}</div>
+      <div className="metrics">{Object.entries(labels).map(([key, label]) => <div key={key}
+        data-pending={(['pending', 'reports', 'corrections'].includes(key) && resource.data.metrics[key] > 0) || undefined}>
+        <span className="mono">{resource.data.metrics[key]}</span><p>{label}</p></div>)}</div>
       <h2>Actividad reciente</h2>
       {resource.data.logs.length ? <Table headings={['Acción', 'Fecha', 'Detalle']}>{resource.data.logs.map((item) => <tr key={item.id}>
         <td>{item.action}</td><td className="mono">{displayDate(item.created_at)}</td><td>{item.message || '—'}</td></tr>)}</Table>
@@ -162,28 +164,31 @@ export function AdminRequest() {
       {resource.data && (() => {
         const item = resource.data
         return <>
-          <div className="review-card">
-            <div className="review-head"><Badge>{statuses[item.status]}</Badge><span className="mono">{displayDate(item.created_at)}</span></div>
-            <h2>{item.proposed_name || 'Sucursal de Google Places'}</h2>
-            {item.branch_name && <p>{item.branch_name} · {item.zone}</p>}{item.address && <p>{item.address}</p>}
-            <p className="mono muted">Solicitante: {item.alias} · ID Google Places: {item.place_id || '—'}</p>
-            {item.place_id && <button type="button" className="button button-outline" aria-expanded={showReference}
-              onClick={() => setShowReference((open) => !open)}>{showReference ? 'Ocultar referencia' : 'Consultar referencia de Google Places'}</button>}
-            {showReference && <Status resource={reference}>{reference.data && <div className="google-panel">
-              <PlaceSummary place={reference.data} /><PlacesAttribution />
-            </div>}</Status>}
-            {item.reason && <p className="notice">{item.reason}</p>}
+          <div className="request-comparison">
+            <div className="review-card">
+              <div className="review-head"><Badge>{statuses[item.status]}</Badge><span className="mono">{displayDate(item.created_at)}</span></div>
+              <h2>{item.proposed_name || 'Sucursal de Google Places'}</h2>
+              {item.branch_name && <p>{item.branch_name} · {item.zone}</p>}{item.address && <p>{item.address}</p>}
+              <p className="mono muted">Solicitante: {item.alias} · ID Google Places: {item.place_id || '—'}</p>
+              {item.place_id && <button type="button" className="button button-outline" aria-expanded={showReference}
+                onClick={() => setShowReference((open) => !open)}>{showReference ? 'Ocultar referencia' : 'Consultar referencia de Google Places'}</button>}
+              {showReference && <Status resource={reference}>{reference.data && <div className="google-panel">
+                <PlaceSummary place={reference.data} /><PlacesAttribution />
+              </div>}</Status>}
+              {item.reason && <p className="notice">{item.reason}</p>}
+            </div>
+            {item.status === 'pending' && <section className="request-matches"><h2>Posibles duplicados</h2>
+              {item.duplicates.length ? <div className="picker-results">{item.duplicates.map((branch) => <button key={branch.id}
+                disabled={branch.status !== 'active'} className="picker-result" onClick={() => { setSelected(branch); setMode('link') }}>
+                <span>{branch.name} · {branch.branch_name}<small>{branch.zone} · {branch.address}</small></span>
+              </button>)}</div> : <p className="muted">No se detectaron coincidencias.</p>}
+            </section>}
           </div>
           <div className="review-card">
             <div className="review-head"><Badge>{item.category}</Badge><span>Primera reseña</span></div>
             <ReviewContents review={item} /><AdminImages ids={item.image_ids} />
           </div>
           {item.status === 'pending' && <>
-            <h2>Posibles duplicados</h2>
-            {item.duplicates.length ? <div className="picker-results">{item.duplicates.map((branch) => <button key={branch.id}
-              disabled={branch.status !== 'active'} className="picker-result" onClick={() => { setSelected(branch); setMode('link') }}>
-              <span>{branch.name} · {branch.branch_name}<small>{branch.zone} · {branch.address}</small></span>
-            </button>)}</div> : <p className="muted">No se detectaron coincidencias.</p>}
             <div className="form-actions">
               {[['approve', 'Aprobar nueva ficha'], ['link', 'Vincular existente'], ['reject', 'Rechazar alta']].map(([value, label]) => <button key={value}
                 className="button button-outline" aria-pressed={mode === value} onClick={() => setMode(value)}>{label}</button>)}
@@ -262,7 +267,7 @@ export function AdminModeration({ corrections = false }) {
         {item.resolution && <p className="notice">{item.resolution}</p>}
         <button className="text-button underline" aria-expanded={active === item.id} onClick={() => setActive(active === item.id ? null : item.id)}>Ver reseña y resolución</button>
         {active === item.id && <>
-          <p className="review-body">{item.description}</p>
+          <p className="review-body moderation-original">{item.description}</p>
           {item.slug && item.review_status === 'published' && <Link className="inline-link" to={goBranch(item.slug)}>Ir a la ficha</Link>}
           <AdminImages ids={item.image_ids} />
           {item.status === 'pending' && <MutationForm onSend={async (form) => {

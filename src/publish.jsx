@@ -53,7 +53,7 @@ function SelectField({ label, name }) {
 function DetailsFields({ kind }) {
   const charge = kind === 'charge'
   const price = kind === 'price' || kind === 'buffet'
-  return <div className="field-grid">
+  return <div className="field-grid review-fields">
     {price && <label>Precio anunciado<input name="advertisedPrice" type="number" min="0" step="0.01" /></label>}
     {charge && <label>Concepto del cargo<input name="concept" maxLength={120} /></label>}
     {(charge || kind === 'tip') && <SelectField label="Cuándo se informó" name="timing" />}
@@ -191,7 +191,7 @@ export function RequestPage() {
   const [results, setResults] = useState(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
-  return <div className="shell reading page-pad">
+  return <div className="shell reading page-pad request-sheets">
     <PageHeading label="APORTAR / ALTA DE SUCURSAL" title="Proponer un establecimiento" />
     <p className="lede">Escribe tu primera reseña ahora. La verás publicada al aprobarse la ficha de esta sucursal.</p>
     <section className="google-panel">

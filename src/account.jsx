@@ -101,7 +101,7 @@ export function AuthPage({ register = false }) {
     <PageHeading label="CUENTA CLARA / ACCESO" title={step === 'verify' ? 'Verifica tu correo' : step === 'register' ? 'Crea tu cuenta' : 'Inicia sesión'} />
     <p className="lede">{step === 'verify' ? `Ingresa el código enviado a ${email}.` : 'Puedes consultar el directorio sin cuenta. Inicia sesión para compartir una experiencia.'}</p>
     {loading ? <p className="loading mono">Cargando…</p> : !client ? <p className="notice" role="alert">El acceso a cuentas no está disponible.</p> :
-      <form className="form-panel" key={step} onSubmit={submit}>
+      <form className="form-panel access-sheet" data-step={step} key={step} onSubmit={submit}>
         {(error || params.get('google') === 'error') && <p className="notice" role="alert">{error || 'No se completó el acceso con Google. Intenta de nuevo o usa tu correo.'}</p>}
         {note && <p className="notice" role="status">{note}</p>}
         {step === 'verify'
@@ -142,7 +142,7 @@ function ProfileForm({ account, email, request, refresh }) {
     setPreview(url)
     return () => URL.revokeObjectURL(url)
   }, [file])
-  return <form className="form-panel" onSubmit={async (event) => {
+  return <form className="form-panel profile-sheet" onSubmit={async (event) => {
     event.preventDefault()
     setStatus({ busy: true })
     try {
@@ -169,7 +169,7 @@ function ProfileForm({ account, email, request, refresh }) {
       </div>
     </div>
     <label>Alias público<input value={alias} onChange={(event) => setAlias(event.target.value)} minLength={2} maxLength={50} pattern="[^@]+" disabled={status.busy} required /></label>
-    <label>Correo de acceso<input value={email || ''} type="email" readOnly /><span className="help">Este correo no se muestra en tu perfil público.</span></label>
+    <label className="private-email">Correo de acceso<input value={email || ''} type="email" readOnly /><span className="help">Este correo no se muestra en tu perfil público.</span></label>
     {status.error && <p className="notice" role="alert">{status.error}</p>}
     {status.ok && <p className="notice" role="status">{status.ok}</p>}
     <button className="button button-dark" disabled={status.busy}>{status.busy ? 'Guardando…' : 'Guardar perfil'}</button>
@@ -189,7 +189,7 @@ export function ProfilePage() {
 
 function Contribution({ item, request }) {
   const [correcting, setCorrecting] = useState(false)
-  return <article className="review-card">
+  return <article className="review-card contribution-copy" data-status={item.request_status || item.status}>
     <div className="review-head"><Badge>{statuses[item.request_status] || statuses[item.status]}</Badge><span className="mono">{displayDate(item.created_at)}</span></div>
     <h3>{item.title}</h3>
     {item.slug && item.status === 'published' ? <Link className="underline" to={goBranch(item.slug)}>{item.name} · {item.branch_name}</Link>

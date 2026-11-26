@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react'
-import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Link, useLocation, useNavigate, useNavigationType, useParams, useSearchParams } from 'react-router'
 import { api, LiveRefresh, useAuth, useResource } from './client.jsx'
 import { Avatar, Badge, currency, displayDate, Empty, goBranch, Icon, imageUrl, MessageForm, Pagination, SectionHead, Status } from './ui.jsx'
 import './directory-motion.css'
@@ -30,9 +30,7 @@ function Receipt() {
   return <section className="table-study" aria-label="Explora las capas de una cuenta">
     <div className="still-life">
       <div aria-hidden="true" className="table-plate"><div className="plate-engraving">
-        <svg viewBox="0 0 200 200" fill="none" stroke="currentColor">
-          {Array.from({ length: 32 }, (_, i) => <ellipse key={i} cx="100" cy="100" rx="85" ry="39" transform={`rotate(${i * 5.625} 100 100)`} />)}
-        </svg><b>cc.</b>
+        <span className="engraving" /><b>cc.</b>
       </div></div>
       <div className="study-receipt" data-layer={active}>
         <div className="study-carbon" aria-hidden="true" />
@@ -60,18 +58,42 @@ function CategoriesNav({ resource }) {
   </div>
 }
 
+function BranchImage({ id, cover = false }) {
+  const [loaded, setLoaded] = useState(null)
+  return <span className={cover ? 'branch-photo' : 'place-thumb'} data-card-piece="image">
+    <span className="engraving" aria-hidden="true" />
+    {id && <img key={id} src={imageUrl(id)} loading={cover ? 'eager' : 'lazy'} data-ready={loaded === id || undefined}
+      onLoad={() => setLoaded(id)} alt={cover ? 'Fotografía aportada por la comunidad' : ''} />}
+  </span>
+}
+
 export function EstablishmentCard({ item, compact = false }) {
+  const navigate = useNavigate()
+  const path = goBranch(item.slug)
+  function openCard(event) {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.altKey || event.shiftKey ||
+        !window.matchMedia('(prefers-reduced-motion: no-preference)').matches) return
+    const origin = {}
+    for (const piece of event.currentTarget.querySelectorAll('[data-card-piece]')) {
+      const { left, top, width } = piece.getBoundingClientRect()
+      origin[piece.dataset.cardPiece] = { left, top, width }
+    }
+    event.preventDefault()
+    navigate(path, { state: { card: item, origin } })
+  }
   return <article className={`place-card ${compact ? 'place-compact' : ''}`}>
-    <Link className="place-link" to={goBranch(item.slug)}>
-      <span className="place-thumb">{item.image_id ? <img loading="lazy" src={imageUrl(item.image_id)} alt="" /> : <Icon name="fork" size={23} />}</span>
-      <div className="place-info"><h3>{item.name}</h3><p>{item.branch_name} · {item.zone}</p></div>
-      <Icon name="diagonal" className="place-arrow" size={16} />
+    <Link className="place-link" to={path} state={{ card: item }} onClick={openCard}>
+      <div className="place-summary">
+        <BranchImage id={item.image_id} />
+        <div className="place-info"><h3><span data-card-piece="title">{item.name}</span></h3><p>{item.branch_name} · {item.zone}</p></div>
+        <Icon name="diagonal" className="place-arrow" size={16} />
+      </div>
+      {!compact && <div className="place-details">
+        {item.categories?.length > 0 && <div className="badges">{item.categories.map((category) => <Badge key={category}>{category}</Badge>)}</div>}
+        <span className="mono">{item.review_count} {item.review_count === 1 ? 'aporte' : 'aportes'}</span>
+        <span className="mono">{item.latest_review ? `Último: ${displayDate(item.latest_review)}` : 'Sin aportaciones'}</span>
+      </div>}
     </Link>
-    {!compact && <div className="place-details">
-      <span className="mono">{item.review_count} {item.review_count === 1 ? 'aporte' : 'aportes'}</span>
-      <span className="mono">{item.latest_review ? `Último: ${displayDate(item.latest_review)}` : 'Sin aportaciones'}</span>
-      {item.categories?.length > 0 && <div className="badges">{item.categories.map((category) => <Badge key={category}>{category}</Badge>)}</div>}
-    </div>}
   </article>
 }
 
@@ -171,14 +193,17 @@ const publicViews = new Set()
 export function ReviewContents({ review }) {
   const { title, description, details, amount, visited_on, currency: code } = review
   const data = [
-    ...(amount != null ? [['Monto reportado', currency(amount, code)]] : []),
+    ...(amount != null ? [['Monto reportado', currency(amount, code), 'amount']] : []),
     ...Object.entries(details ?? {}).filter(([key]) => detailLabels[key]).map(([key, value]) => [
-      detailLabels[key], key === 'advertisedPrice' ? currency(value, details.advertisedCurrency || code) : key === 'percentage' ? `${value} %` : value,
+      detailLabels[key], key === 'advertisedPrice' ? currency(value, details.advertisedCurrency || code) : key === 'percentage' ? `${value} %` : value, key,
     ]),
   ]
-  return <><h3>{title}</h3>
-    <p className="review-body">{description}</p>
-    {data.length > 0 && <dl className="review-data">{data.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>}
+  return <>
+    <div className="review-layout">
+      <div className="review-copy"><h3>{title}</h3><p className="review-body">{description}</p></div>
+      {data.length > 0 && <dl className="review-data">{data.map(([label, value, field]) =>
+        <div key={field} data-field={field}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>}
+    </div>
     <p className="mono review-meta">Visita: {displayDate(visited_on)}{review.published_at && <> · Publicación: {displayDate(review.published_at)}</>}</p>
   </>
 }
@@ -200,13 +225,53 @@ function ReviewCard({ review }) {
   </article>
 }
 
+function BranchHeading({ branch, siblings = [], origin }) {
+  const navigate = useNavigate()
+  const header = useRef(null)
+  useLayoutEffect(() => {
+    if (!origin || !window.matchMedia('(prefers-reduced-motion: no-preference)').matches) return
+    const animations = []
+    // Measure after the router has returned the new page to the top.
+    const frame = requestAnimationFrame(() => {
+      for (const piece of header.current.querySelectorAll('[data-card-piece]')) {
+        const from = origin[piece.dataset.cardPiece]
+        const to = piece.getBoundingClientRect()
+        if (!from || !to.width || !piece.animate) continue
+        const transform = `translate(${from.left - to.left}px, ${from.top - to.top}px) scale(${from.width / to.width})`
+        animations.push(piece.animate([{ transform }, { transform: 'none' }], {
+          duration: 330, easing: 'cubic-bezier(.2,.8,.2,1)',
+        }))
+      }
+    })
+    return () => {
+      cancelAnimationFrame(frame)
+      animations.forEach(animation => animation.cancel())
+    }
+  }, [origin])
+
+  return <section className="branch-header" ref={header}>
+    <BranchImage cover id={branch.image_id} />
+    <div>
+      <span className="eyebrow">FICHA DE SUCURSAL</span>
+      <h1><span data-card-piece="title">{branch.name}</span></h1>
+      <p className="branch-name">{branch.branch_name} · {branch.zone}</p>
+      <p className="branch-location"><Icon name="pin" /> {branch.address}</p>
+      <p className="mono muted">{branch.review_count} {branch.review_count === 1 ? 'aportación' : 'aportaciones'}{branch.latest_review && ` · Última: ${displayDate(branch.latest_review)}`}</p>
+      {siblings.length > 1 && <label className="branch-select">Sucursal <select value={branch.slug} onChange={(event) => navigate(goBranch(event.target.value))}>{siblings.map((item) => <option key={item.slug} value={item.slug}>{item.name} · {item.zone}</option>)}</select></label>}
+      <Link className="button button-dark" to={`/publicar?branch=${branch.slug}`}><Icon name="plus" size={17} /> Escribir reseña</Link>
+    </div>
+  </section>
+}
+
 export function BranchPage() {
   const { slug } = useParams()
   const location = useLocation()
-  const navigate = useNavigate()
+  const navigationType = useNavigationType()
   const [params, setParams] = useSearchParams()
   const update = (changes) => setParams(updateParams(params, changes))
   const resource = useResource(`/branches/${encodeURIComponent(slug)}?${params}`)
+  const selected = navigationType === 'PUSH' && location.state?.card?.slug === slug ? location.state.card : null
+  const branch = resource.data?.branch ?? (resource.loading ? selected : null)
 
   useEffect(() => {
     if (!resource.data?.branch || publicViews.has(slug)) return
@@ -217,23 +282,13 @@ export function BranchPage() {
   return <div className="shell page-pad">
     <LiveRefresh channel={`branches/${slug}`} onRefresh={resource.refresh} />
     <Link className="breadcrumb" to="/establecimientos">← Establecimientos</Link>
-    {location.state?.notice && <p className="notice" role="status">{location.state.notice}</p>}
+    {location.state?.notice && <p className="notice print-notice" role="status">{location.state.notice}</p>}
+    {branch && <BranchHeading key={slug} branch={branch} siblings={resource.data?.siblings}
+      origin={selected ? location.state.origin : null} />}
     <Status resource={resource}>
       {resource.data && (() => {
-        const { branch, siblings, categories, items } = resource.data
+        const { categories, items } = resource.data
         return <>
-          <section className="branch-header">
-            <div>
-              <span className="eyebrow">FICHA DE SUCURSAL</span>
-              <h1>{branch.name}</h1>
-              <p className="branch-name">{branch.branch_name} · {branch.zone}</p>
-              <p className="branch-location"><Icon name="pin" /> {branch.address}</p>
-              <p className="mono muted">{branch.review_count} {branch.review_count === 1 ? 'aportación' : 'aportaciones'}{branch.latest_review && ` · Última: ${displayDate(branch.latest_review)}`}</p>
-              {siblings.length > 1 && <label className="branch-select">Sucursal <select value={slug} onChange={(event) => navigate(goBranch(event.target.value))}>{siblings.map((item) => <option key={item.slug} value={item.slug}>{item.name} · {item.zone}</option>)}</select></label>}
-              <Link className="button button-dark" to={`/publicar?branch=${slug}`}><Icon name="plus" size={17} /> Escribir reseña</Link>
-            </div>
-            {branch.image_id && <img className="branch-photo" alt="Fotografía aportada por la comunidad" src={imageUrl(branch.image_id)} />}
-          </section>
           <section className="content-section">
             <SectionHead number="01 / TEMAS" title="¿Qué quieres consultar?" />
             <div className="topic-links branch-topics">

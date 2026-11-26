@@ -108,7 +108,7 @@ export function Footer() {
         {[['Explorar establecimientos','/establecimientos'],['Escribir una reseña','/publicar'],['Términos de uso','/terminos'],['Privacidad','/privacidad']].map(([label, to], i) =>
           <Link to={to} key={to}><small aria-hidden="true">0{i + 1}</small>{label}<Icon name="arrow" size={16} /></Link>)}
       </nav>
-      <div className="footer-imprint"><Brand /><span className="mono footer-note">DIRECTORIO COLABORATIVO</span><span className="imprint-barcode" aria-hidden="true" /></div>
+      <div className="footer-imprint"><Brand /><span className="mono footer-note">DIRECTORIO COLABORATIVO</span><span className="engraving" aria-hidden="true" /><span className="imprint-barcode" aria-hidden="true" /></div>
     </div>
   </footer>
 }

@@ -17,6 +17,7 @@
 }
 
 body { color: var(--black); background: var(--page); }
+::selection { color: #21152e; background: #d6ff00; }
 #root { min-height: 100svh; display: flex; flex-direction: column; }
 main { flex: 1; }
 a, button, input, select, textarea, [tabindex] { outline-offset: 4px; }
@@ -141,7 +142,8 @@ img { max-width: 100%; }
 .place-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .68rem; }
 .place-card { border: 1px solid var(--line); border-radius: 5px; background: var(--white); overflow: hidden; }
 .place-card:hover { border-color: #aaa; }
-.place-link { display: flex; align-items: center; gap: .65rem; padding: .69rem; }
+.place-link { display: block; }
+.place-summary { display: flex; align-items: center; gap: .65rem; padding: .69rem; }
 .place-thumb { width: 52px; height: 52px; display: grid; place-items: center; border-radius: 4px; overflow: hidden; background: var(--soft); color: var(--mid); flex: none; }
 .place-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .place-compact .place-thumb { width: 38px; height: 38px; }

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-100 -100 200 200" fill="none" stroke="#000" stroke-width=".9">
+  <defs>
+    <ellipse id="leaf" rx="85" ry="39"/>
+    <g id="pair"><use href="#leaf"/><use href="#leaf" transform="rotate(5.625)"/></g>
+    <g id="four"><use href="#pair"/><use href="#pair" transform="rotate(11.25)"/></g>
+    <g id="eight"><use href="#four"/><use href="#four" transform="rotate(22.5)"/></g>
+    <g id="half"><use href="#eight"/><use href="#eight" transform="rotate(45)"/></g>
+  </defs>
+  <use href="#half"/><use href="#half" transform="rotate(90)"/>
+</svg>

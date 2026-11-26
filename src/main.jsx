@@ -1,4 +1,4 @@
-import { StrictMode, useEffect } from 'react'
+import { StrictMode, useLayoutEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router'
 import '@fontsource-variable/geist'
@@ -25,12 +25,13 @@ function Legal({ privacy = false }) {
       <p>Publica experiencias propias y utiliza fotografías que tengas derecho a compartir. No incluyas datos personales de otras personas. Puedes solicitar una corrección o reportar contenido para que el equipo lo revise.</p>
       <p>La búsqueda auxiliar usa servicios de Google Maps Platform. Su uso está sujeto a las <a href="https://www.google.com/help/terms_maps/">Condiciones del Servicio de Google Maps</a>.</p>
     </>}
+    <span className="engraving" aria-hidden="true" />
   </article>
 }
 
 function App() {
   const { pathname } = useLocation()
-  useEffect(() => { window.scrollTo(0, 0) }, [pathname])
+  useLayoutEffect(() => { window.scrollTo(0, 0) }, [pathname])
   return <>
     <Header />
     <main id="contenido" tabIndex={-1}><Routes>
@@ -57,7 +58,7 @@ function App() {
       <Route path="/privacidad" element={<Legal privacy />} />
       <Route path="/pitch-hackathon" element={<PitchPage />} />
       <Route path="/pitch-hackaton" element={<Navigate replace to="/pitch-hackathon" />} />
-      <Route path="*" element={<div className="shell page-pad"><Empty title="Página no encontrada"><Link className="inline-link" to="/">Volver al inicio →</Link></Empty></div>} />
+      <Route path="*" element={<div className="shell reading page-pad missing-page"><Empty title="Página no encontrada"><Link className="inline-link" to="/">Volver al inicio →</Link></Empty></div>} />
     </Routes></main>
     <Footer />
   </>
