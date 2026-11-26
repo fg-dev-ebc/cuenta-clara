@@ -333,7 +333,7 @@ export function BranchPage() {
             {items.length ? <div className="reviews">{items.map((review) => <ReviewCard key={review.id} review={review} />)}</div>
               : <Empty description="No hay aportaciones para la selección actual. Esto no indica que no existan cargos o condiciones." />}
             <Pagination {...resource.data} onPage={(page) => update({ page })} />
-            {import.meta.env.DEV && window.location.hostname === 'localhost' &&
+            {(import.meta.env.DEV || import.meta.env.MODE === 'revision-local') &&
               branch.slug === 'la-casa-de-tono-zona-rosa-49dfffb5' && !params.size &&
               <div className="local-review-thread"><LocalReviewThread branch={branch} /></div>}
           </section>
