@@ -5,11 +5,10 @@ import './pitch.css'
 const opening = '¿Cuántas veces hemos consultado las reseñas de un establecimiento y aun así, nos hemos quedado con dudas?'
 const paragraphs = [
   'Un restaurante puede tener 4.8 estrellas, pero ¿la propina es obligatoria?, ¿cuenta con estacionamiento propio o tienes que pagar por estacionarte en la vía pública?',
-  'Un bar puede tener excelentes comentarios, pero ¿cobra entrada?, ¿cuánto cuesta?, ¿te informan de ese cargo antes de ingresar?',
   'Un gimnasio puede tener buenas instalaciones, pero ¿cobra penalizaciones por cancelar?, ¿existen cargos de mantenimiento?, ¿es fácil dar de baja la membresía?',
   'Actualmente, para responder estas preguntas, tenemos que navegar entre decenas o incluso cientos de reseñas, sin garantía de encontrar la información que buscamos.',
   '"El problema es que la información no está segmentada"',
-  'Y así nace Cuenta Clara, una plataforma colaborativa que permite consultar y compartir reseñas organizadas por tema, transformando las experiencias individuales en información útil y estructurada.',
+  'Y así nace Cuenta Clara, una plataforma colaborativa que permite consultar y compartir reseñas organizadas por tema, con el objetivo de transformar las experiencias individuales en información útil y estructurada.',
   'Nuestra visión es convertirnos en el referente de consulta para las decisiones de consumo.',
   'Porque una calificación te dice qué tan satisfechos estuvieron los demás, pero Cuenta Clara te ayuda a saber qué esperar tú.',
 ]
