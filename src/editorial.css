@@ -161,6 +161,7 @@
   .table-study { width: 100%; max-width: 540px; margin-inline: auto; }
   .still-life { height: 245px; }
   .study-slip { z-index: 1; }
+  .study-receipt:not([data-layer="2"]) .study-fold { visibility: hidden; }
 }
 @media (max-width: 640px) {
   .editorial .highlights { gap: .7rem; }
