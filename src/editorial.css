@@ -160,6 +160,7 @@
   .editorial .hero { grid-template-columns: 1fr; }
   .table-study { width: 100%; max-width: 540px; margin-inline: auto; }
   .still-life { height: 245px; }
+  .study-slip { z-index: 1; }
 }
 @media (max-width: 640px) {
   .editorial .highlights { gap: .7rem; }
