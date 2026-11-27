@@ -227,14 +227,12 @@ input[type="checkbox"] { accent-color: var(--wine); }
 .footer-index a { display: grid; grid-template-columns: 2rem 1fr auto; align-items: center; gap: .5rem; border-top: 1px solid #bd96a7; padding: .65rem 0; font-size: .92rem; }
 .footer-index a:hover { text-decoration: underline; text-underline-offset: .2em; }
 .footer-imprint { grid-column: 1/-1; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; border-top: 1px solid #bd96a7; padding-top: 1rem; }
-.footer-imprint .engraving { margin-inline-start: auto; width: 2.3rem; color: var(--wine); }
-.imprint-barcode { width: 85px; height: 20px; background: repeating-linear-gradient(90deg,var(--ink) 0 1px,transparent 1px 3px,var(--ink) 3px 6px,transparent 6px 8px); }
+.imprint-barcode { margin-inline-start: auto; width: 85px; height: 20px; background: repeating-linear-gradient(90deg,var(--ink) 0 1px,transparent 1px 3px,var(--ink) 3px 6px,transparent 6px 8px); }
 .footer-imprint .brand-divider { color: var(--wine); }
 @media (max-width:640px) {
   .branch-header { grid-template-columns: minmax(0,1fr); gap: .9rem; }
   .branch-photo { width: 4.75rem; padding: .2rem; }
   .footer-imprint { gap: .5rem; }
-  .footer-imprint .engraving { width: 1.6rem; }
   .footer-content { display: grid; grid-template-columns: 1fr; }
   .footer-note { font-size: .62rem; }
   .imprint-barcode { width: 35px; }
