@@ -48,7 +48,8 @@ export function PitchPage() {
 
   return <article className="shell pitch-page page-pad">
     <PageHeading label="CUENTA CLARA" title="Video promocional" />
-    <video controls playsInline preload="metadata" className="w-full" aria-label="Video promocional de Cuenta Clara">
+    <video controls playsInline preload="metadata" poster="/assets/thumbnail.png" className="w-full"
+      aria-label="Video promocional de Cuenta Clara">
       <source src="/assets/pitch-hackathon.mp4" type="video/mp4" />
       <a href="/assets/pitch-hackathon.mp4">Abrir el video</a>
     </video>

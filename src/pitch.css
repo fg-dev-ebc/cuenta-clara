@@ -1,5 +1,5 @@
 .pitch-page > :is(.folio-heading, video) { max-width: 760px; margin-inline: auto; }
-.pitch-page video { display: block; }
+.pitch-page video { display: block; aspect-ratio: 16 / 9; }
 .pitch {
   margin-top: 2.5rem;
   padding-top: 1.5rem;
