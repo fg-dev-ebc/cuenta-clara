@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate, useNavigationType, useParams, useSearchParams } from 'react-router'
-import { api, LiveRefresh, useAuth, useResource } from './client.jsx'
+import { api, LiveRefresh, useAuth, usePublicResource } from './client.jsx'
 import { Avatar, Badge, BrandMark, currency, displayDate, Empty, goBranch, Icon, imageUrl, MessageForm, Pagination, SectionHead, Status } from './ui.jsx'
 import './directory-motion.css'
 import { TextGenerate } from './motion-ui.jsx'
@@ -49,10 +49,38 @@ function Receipt() {
   </section>
 }
 
+function Placeholders({ compact = false }) {
+  return <div className={compact ? 'highlight-list' : 'place-grid'} aria-hidden="true">
+    {Array.from({ length: compact ? 3 : 6 }, (_, index) => <div className="place-card" key={index}>
+      <div className="place-summary">
+        <span className="place-thumb skeleton-block" />
+        <div className="skeleton-lines"><span /><span /></div>
+        <span />
+      </div>
+      {!compact && <div className="place-details skeleton-lines"><span /></div>}
+    </div>)}
+  </div>
+}
+
+function BranchPlaceholder() {
+  return <div className="branch-header" aria-hidden="true">
+    <span className="branch-photo skeleton-block" />
+    <div className="skeleton-lines branch-skeleton"><span /><span /><span /><span /><span /></div>
+  </div>
+}
+
+function ReviewPlaceholders() {
+  return <div className="reviews" aria-hidden="true">
+    {[0, 1].map((index) => <div key={index} className="review-card skeleton-lines review-skeleton"><span /><span /><span /><span /></div>)}
+  </div>
+}
+
 function CategoriesNav({ resource }) {
   return <div className="topics">
     <span className="eyebrow">EXPLORAR POR TEMA</span>
-    <Status resource={resource}>
+    <Status resource={resource} placeholder={<div className="topic-links" aria-hidden="true">
+      {[0, 1, 2].map((index) => <span className="skeleton-block topic-skeleton" key={index} />)}
+    </div>}>
       <div className="topic-links">{resource.data?.map((category) => <Link key={category.id} to={`/establecimientos?category=${category.slug}`} className="topic-pill">{category.name}</Link>)}</div>
     </Status>
   </div>
@@ -101,14 +129,14 @@ function Highlights({ resource }) {
   return <section className="highlights content-section" aria-label="Actividad del directorio">
     <div className="highlight-panel">
       <SectionHead number="01 / ACTIVIDAD" title="Más consultados" icon="eye" description="Las fichas más visitadas en los últimos 30 días." />
-      <Status resource={resource}>
+      <Status resource={resource} placeholder={<Placeholders compact />}>
         {resource.data?.viewed.length ? <div className="highlight-list">{resource.data.viewed.map((item) => <EstablishmentCard key={item.id} item={item} compact />)}</div>
           : <Empty title="Todavía no hay consultas" description="Aquí aparecerán las fichas más visitadas." icon="eye" />}
       </Status>
     </div>
     <div className="highlight-panel">
       <SectionHead number="02 / COMUNIDAD" title="Más comentados" icon="comment" description="Las fichas con más aportaciones publicadas." />
-      <Status resource={resource}>
+      <Status resource={resource} placeholder={<Placeholders compact />}>
         {resource.data?.discussed.length ? <div className="highlight-list">{resource.data.discussed.map((item) => <EstablishmentCard key={item.id} item={item} compact />)}</div>
           : <Empty title="Aún no hay comentarios" description="Las primeras aportaciones aparecerán aquí." icon="comment" />}
       </Status>
@@ -132,15 +160,17 @@ function DirectorySection({ home = false, resource, categories, filters, update 
         {categories.data?.map((item) => <option key={item.id} value={item.slug}>{item.name}</option>)}
       </select></label>}
     </div>
-    <Status resource={resource}>
-      {resource.data?.items.length
-        ? <div className="place-grid">{resource.data.items.map((item) => <EstablishmentCard item={item} key={item.id} />)}</div>
-        : <Empty icon="search" title={q || zone || category ? 'No encontramos coincidencias' : 'El directorio todavía está vacío'}
-          description={q || zone || category ? 'Prueba otro nombre, sucursal, zona o categoría.' : 'Propón un restaurante para empezar a reunir información sobre sus sucursales.'}>
-          <Link className="inline-link" to={`/solicitar-establecimiento${q ? `?q=${encodeURIComponent(q)}` : ''}`}>Proponer un establecimiento <Icon name="arrow" size={15} /></Link>
-        </Empty>}
-      {resource.data && <Pagination {...resource.data} onPage={(page) => update({ page })} />}
-    </Status>
+    <div aria-busy={resource.updating || undefined}>
+      <Status resource={resource} placeholder={<Placeholders />}>
+        {resource.data?.items.length
+          ? <div className="place-grid">{resource.data.items.map((item) => <EstablishmentCard item={item} key={item.id} />)}</div>
+          : <Empty icon="search" title={q || zone || category ? 'No encontramos coincidencias' : 'El directorio todavía está vacío'}
+            description={q || zone || category ? 'Prueba otro nombre, sucursal, zona o categoría.' : 'Propón un restaurante para empezar a reunir información sobre sus sucursales.'}>
+            <Link className="inline-link" to={`/solicitar-establecimiento${q ? `?q=${encodeURIComponent(q)}` : ''}`}>Proponer un establecimiento <Icon name="arrow" size={15} /></Link>
+          </Empty>}
+        {resource.data && <Pagination {...resource.data} pending={resource.updating} onPage={(page) => update({ page })} />}
+      </Status>
+    </div>
     {resource.data?.items.length > 0 && <p className="muted directory-note">¿No encuentras el establecimiento? <Link className="underline" to={`/solicitar-establecimiento${q ? `?q=${encodeURIComponent(q)}` : ''}`}>Solicitar un alta</Link></p>}
   </section>
 }
@@ -159,9 +189,9 @@ export function DirectoryPage({ home = false }) {
   const [params, setParams] = useSearchParams()
   const filters = Object.fromEntries(params)
   const update = (changes) => setParams(updateParams(params, changes))
-  const categories = useResource('/categories')
-  const resource = useResource(`/directory?${params}`)
-  const highlights = useResource(home ? '/highlights' : null)
+  const categories = usePublicResource('/categories')
+  const resource = usePublicResource(`/directory?${params}`, { keepPrevious: true })
+  const highlights = usePublicResource(home ? '/highlights' : null)
   const refresh = useCallback(() => { resource.refresh(); highlights.refresh(); categories.refresh() }, [resource.refresh, highlights.refresh, categories.refresh])
 
   return <div className="shell editorial">
@@ -253,23 +283,18 @@ function BranchHeading({ branch, siblings = [], origin }) {
   const header = useRef(null)
   useLayoutEffect(() => {
     if (!origin || !window.matchMedia('(prefers-reduced-motion: no-preference)').matches) return
+    // RouteScroll has already positioned the new view in this layout pass.
+    const pieces = [...header.current.querySelectorAll('[data-card-piece]')]
+      .map((piece) => ({ piece, from: origin[piece.dataset.cardPiece], to: piece.getBoundingClientRect() }))
     const animations = []
-    // Measure after the router has returned the new page to the top.
-    const frame = requestAnimationFrame(() => {
-      for (const piece of header.current.querySelectorAll('[data-card-piece]')) {
-        const from = origin[piece.dataset.cardPiece]
-        const to = piece.getBoundingClientRect()
-        if (!from || !to.width || !piece.animate) continue
-        const transform = `translate(${from.left - to.left}px, ${from.top - to.top}px) scale(${from.width / to.width})`
-        animations.push(piece.animate([{ transform }, { transform: 'none' }], {
-          duration: 330, easing: 'cubic-bezier(.2,.8,.2,1)',
-        }))
-      }
-    })
-    return () => {
-      cancelAnimationFrame(frame)
-      animations.forEach(animation => animation.cancel())
+    for (const { piece, from, to } of pieces) {
+      if (!from?.width || !to.width || !piece.animate) continue
+      const transform = `translate(${from.left - to.left}px, ${from.top - to.top}px) scale(${from.width / to.width})`
+      animations.push(piece.animate([{ transform }, { transform: 'none' }], {
+        duration: 260, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards',
+      }))
     }
+    return () => animations.forEach(animation => animation.cancel())
   }, [origin])
 
   return <section className="branch-header" ref={header}>
@@ -288,13 +313,18 @@ function BranchHeading({ branch, siblings = [], origin }) {
 
 export function BranchPage() {
   const { slug } = useParams()
+  return <BranchDetail key={slug} slug={slug} />
+}
+
+function BranchDetail({ slug }) {
   const location = useLocation()
   const navigationType = useNavigationType()
   const [params, setParams] = useSearchParams()
   const update = (changes) => setParams(updateParams(params, changes))
-  const resource = useResource(`/branches/${encodeURIComponent(slug)}?${params}`)
-  const selected = navigationType === 'PUSH' && location.state?.card?.slug === slug ? location.state.card : null
+  const resource = usePublicResource(`/branches/${encodeURIComponent(slug)}?${params}`, { keepPrevious: true })
+  const selected = location.state?.card?.slug === slug ? location.state.card : null
   const branch = resource.data?.branch ?? (resource.loading ? selected : null)
+  const { categories, items } = resource.data ?? {}
 
   useEffect(() => {
     if (!resource.data?.branch || publicViews.has(slug)) return
@@ -306,12 +336,11 @@ export function BranchPage() {
     <LiveRefresh channel={`branches/${slug}`} onRefresh={resource.refresh} />
     <Link className="breadcrumb" to="/establecimientos">← Establecimientos</Link>
     {location.state?.notice && <p className="notice print-notice" role="status">{location.state.notice}</p>}
-    {branch && <BranchHeading key={slug} branch={branch} siblings={resource.data?.siblings}
-      origin={selected ? location.state.origin : null} />}
-    <Status resource={resource}>
-      {resource.data && (() => {
-        const { categories, items } = resource.data
-        return <>
+    {branch && <BranchHeading branch={branch} siblings={resource.data?.siblings}
+      origin={selected && navigationType === 'PUSH' ? location.state.origin : null} />}
+    {!branch && resource.loading && <BranchPlaceholder />}
+    <Status resource={resource} placeholder={<ReviewPlaceholders />}>
+      {resource.data && <>
           <section className="content-section">
             <SectionHead number="01 / TEMAS" title="¿Qué quieres consultar?" />
             <div className="topic-links branch-topics">
@@ -331,14 +360,15 @@ export function BranchPage() {
               <button className="button button-outline">Filtrar</button>
               {(params.get('from') || params.get('to')) && <button type="button" className="text-button" onClick={() => update({ from: null, to: null, page: null })}>Quitar fechas</button>}
             </form>
-            {items.length ? <div className="reviews">{items.map((review) => <ReviewCard key={review.id} review={review} />)}</div>
-              : <Empty description="No hay aportaciones para la selección actual. Esto no indica que no existan cargos o condiciones." />}
-            <Pagination {...resource.data} onPage={(page) => update({ page })} />
-            {branch.slug === 'la-casa-de-tono-zona-rosa-49dfffb5' && !params.size &&
-              <IllustrativeReviewThread branch={branch} />}
+            <div aria-busy={resource.updating || undefined}>
+              {items.length ? <div className="reviews">{items.map((review) => <ReviewCard key={review.id} review={review} />)}</div>
+                : <Empty description="No hay aportaciones para la selección actual. Esto no indica que no existan cargos o condiciones." />}
+              <Pagination {...resource.data} pending={resource.updating} onPage={(page) => update({ page })} />
+              {branch.slug === 'la-casa-de-tono-zona-rosa-49dfffb5' && !params.size &&
+                <IllustrativeReviewThread branch={branch} />}
+            </div>
           </section>
-        </>
-      })()}
+      </>}
     </Status>
   </div>
 }

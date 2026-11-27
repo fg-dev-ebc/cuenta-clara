@@ -148,18 +148,21 @@ export function Empty({ title = 'Sin reportes disponibles', description, childre
   </div>
 }
 
-export function Status({ resource, children }) {
-  if (resource.loading) return <p className="loading mono" role="status">Cargando…</p>
+export function Status({ resource, placeholder, children }) {
+  if (resource.loading) return <>
+    <p className={placeholder ? 'sr-only' : 'loading mono'} role="status">Cargando…</p>
+    {placeholder}
+  </>
   if (resource.error && !resource.data) return <div className="notice" role="alert"><p>{resource.error.message}</p><button className="text-button underline" onClick={resource.refresh}>Reintentar</button></div>
   return children
 }
 
-export function Pagination({ page, hasNext, onPage }) {
+export function Pagination({ page, hasNext, onPage, pending }) {
   if (page < 2 && !hasNext) return null
   return <nav className="pagination" aria-label="Paginación">
-    <button className="button button-outline" disabled={page < 2} onClick={() => onPage(page - 1)}>Anterior</button>
+    <button className="button button-outline" disabled={page < 2} aria-disabled={pending || undefined} onClick={() => { if (!pending) onPage(page - 1) }}>Anterior</button>
     <span className="mono">Página {page}</span>
-    <button className="button button-outline" disabled={!hasNext} onClick={() => onPage(page + 1)}>Siguiente</button>
+    <button className="button button-outline" disabled={!hasNext} aria-disabled={pending || undefined} onClick={() => { if (!pending) onPage(page + 1) }}>Siguiente</button>
   </nav>
 }
 

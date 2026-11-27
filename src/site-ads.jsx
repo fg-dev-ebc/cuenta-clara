@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import './site-ads.css'
 
 const styles = [
@@ -57,6 +57,7 @@ const campaigns = [
 ].map(([name, line, tag], index) => ({ name, line, tag, ...styles[index % styles.length] }))
 
 const placements = [3900, 5400, 6900, 4700, 6100, 7600]
+const railSlots = 4
 const frameInterval = 1000 / 30
 const campaignAt = (index, rotation) => (index * 7 + rotation * 13) % campaigns.length
 
@@ -94,20 +95,23 @@ function AdSlot({ index, rotation }) {
 export function SiteAds({ children }) {
   const layout = useRef(null)
   const playback = useRef(null)
-  const [paused, setPaused] = useState(false)
-  const [rows, setRows] = useState(3)
+  const [repeats, setRepeats] = useState(2)
+  // const [paused, setPaused] = useState(false)
   const [rotations, setRotations] = useState({})
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    const tracks = [...layout.current.querySelectorAll('.pitch-ad-track')]
+    function fitTracks() {
+      const count = Math.max(...tracks.map(track => {
+        const repeatHeight = track.querySelector('.pitch-ad-repeat').offsetHeight
+        return repeatHeight ? Math.ceil(track.clientHeight / repeatHeight) + 1 : 2
+      }))
+      setRepeats(count)
+    }
+    fitTracks()
     if (!('ResizeObserver' in window)) return
-    const surface = layout.current
-    const rail = surface.querySelector('.pitch-ad-rail-left')
-    const wide = window.matchMedia('(min-width: 1050px)')
-    const observer = new ResizeObserver(([entry]) => {
-      const height = entry.contentRect.height
-      setRows(wide.matches ? Math.max(2, Math.round((height - 38) / (rail.clientWidth * .57 + 137))) : 3)
-    })
-    observer.observe(surface)
+    const observer = new ResizeObserver(fitTracks)
+    tracks.forEach(track => observer.observe(track))
     return () => observer.disconnect()
   }, [])
 
@@ -118,10 +122,14 @@ export function SiteAds({ children }) {
     surface.setAttribute('data-ad-controls', '')
     const motion = window.matchMedia('(prefers-reduced-motion: no-preference)')
     const slots = new Map()
+    const clocks = Array.from({ length: railSlots * 2 }, (_, index) => ({
+      elapsed: 0, rotation: 0, duration: placements[index % placements.length],
+    }))
+    const visible = new Set()
     let scene
     let loading = false
     let stopped = false
-    let manuallyPaused = false
+    // let manuallyPaused = false
     let frame = 0
     let lastTime = 0
 
@@ -131,29 +139,35 @@ export function SiteAds({ children }) {
       if (lastTime && delta < frameInterval - 1) return
       lastTime = time
       let changed = false
-      for (const slot of slots.values()) {
-        if (!slot.visible) continue
-        slot.elapsed += delta
-        const rotation = Math.floor(slot.elapsed / slot.duration)
-        if (rotation !== slot.rotation) {
-          slot.rotation = rotation
+      const activeClocks = new Set()
+      for (const slot of visible) {
+        const clock = clocks[slot.index]
+        if (activeClocks.has(clock)) continue
+        activeClocks.add(clock)
+        clock.elapsed += delta
+        const rotation = Math.floor(clock.elapsed / clock.duration)
+        if (rotation !== clock.rotation) {
+          clock.rotation = rotation
           changed = true
         }
-        const progress = slot.elapsed % slot.duration / slot.duration
+      }
+      for (const slot of visible) {
+        const { elapsed, rotation, duration } = clocks[slot.index]
+        const progress = elapsed % duration / duration
         slot.element.style.setProperty('--ad-progress', progress)
         if (scene) {
           const campaign = campaignAt(slot.index, rotation)
-          slot.canvas.toggleAttribute('data-ready', scene.draw(slot.canvas, campaign, slot.elapsed / 1000, progress, slot.index))
+          slot.canvas.toggleAttribute('data-ready', scene.draw(slot.canvas, campaign, elapsed / 1000, progress, slot.index))
         }
       }
-      if (changed) setRotations(Object.fromEntries([...slots.values()].map(slot => [slot.index, slot.rotation])))
+      if (changed) setRotations(clocks.map(clock => clock.rotation))
     }
 
     function syncPlayback() {
-      const enabled = motion.matches && !manuallyPaused && !document.hidden
-      const running = enabled && [...slots.values()].some(slot => slot.visible)
+      const enabled = motion.matches && !document.hidden // && !manuallyPaused
+      const running = enabled && visible.size > 0
       for (const slot of slots.values()) {
-        slot.element.toggleAttribute('data-running', enabled && slot.visible)
+        slot.element.toggleAttribute('data-running', enabled && visible.has(slot))
         if (!motion.matches) slot.canvas.removeAttribute('data-ready')
       }
       if (running && !frame) frame = requestAnimationFrame(animate)
@@ -175,34 +189,33 @@ export function SiteAds({ children }) {
     const observer = new IntersectionObserver(entries => {
       for (const entry of entries) {
         const slot = slots.get(entry.target)
-        if (slot) slot.visible = entry.isIntersecting
+        if (!slot) {
+          if (entry.target.classList.contains('pitch-ad-track')) entry.target.toggleAttribute('data-running', entry.isIntersecting)
+        } else if (entry.isIntersecting) visible.add(slot)
+        else visible.delete(slot)
       }
       syncPlayback()
     })
+    const rails = surface.querySelectorAll('.pitch-ad-track')
+    rails.forEach(element => observer.observe(element))
     motion.addEventListener('change', syncPlayback)
     document.addEventListener('visibilitychange', syncPlayback)
     playback.current = {
-      pause(value) {
-        manuallyPaused = value
-        syncPlayback()
-      },
+      // pause(value) {
+      //   manuallyPaused = value
+      //   syncPlayback()
+      // },
       syncSlots() {
-        let removed = false
-        for (const element of slots.keys()) {
+        for (const [element, slot] of slots) {
           if (surface.contains(element)) continue
-          removed = true
           observer.unobserve(element)
           slots.delete(element)
+          visible.delete(slot)
         }
-        if (removed) setRotations(Object.fromEntries([...slots.values()].map(slot => [slot.index, slot.rotation])))
         for (const element of surface.querySelectorAll('[data-ad-slot]')) {
           if (slots.has(element)) continue
           const index = Number(element.dataset.adSlot)
-          const duration = placements[index % placements.length]
-          slots.set(element, {
-            element, index, canvas: element.querySelector('canvas'), visible: false,
-            elapsed: 0, rotation: 0, duration,
-          })
+          slots.set(element, { element, index, canvas: element.querySelector('canvas') })
           observer.observe(element)
         }
         syncPlayback()
@@ -217,33 +230,41 @@ export function SiteAds({ children }) {
       document.removeEventListener('visibilitychange', syncPlayback)
       scene?.dispose()
       surface.removeAttribute('data-ad-controls')
+      rails.forEach(element => element.removeAttribute('data-running'))
       playback.current = null
     }
   }, [])
 
-  useEffect(() => { playback.current?.syncSlots() }, [rows])
-  useEffect(() => { playback.current?.pause(paused) }, [paused])
+  // useEffect(() => { playback.current?.pause(paused) }, [paused])
+  useEffect(() => { playback.current?.syncSlots() }, [repeats])
 
   function renderRail(side) {
-    return Array.from({ length: rows }, (_, row) => {
-      const index = row * 2 + side
-      return <AdSlot key={index} index={index} rotation={rotations[index] ?? 0} />
-    })
+    return <div className="pitch-ad-track">
+      <div className="pitch-ad-belt">
+        {Array.from({ length: repeats }, (_, repeat) => <div className="pitch-ad-repeat" key={repeat} aria-hidden={repeat > 0 || undefined}>
+          {Array.from({ length: railSlots }, (_, row) => {
+            const index = row * 2 + side
+            return <AdSlot key={index} index={index} rotation={rotations[index] ?? 0} />
+          })}
+        </div>)}
+      </div>
+    </div>
   }
 
+  // The pause control also used data-ads-paused={paused || undefined} on this layout.
   return <div className="site-ad-layout" ref={layout}>
     <div className="site-ad-main">{children}</div>
     <aside className="pitch-ad-rail pitch-ad-rail-left" aria-label="Anuncios, primer bloque">
-      <div className="pitch-ad-rail-label">
+      {/* <div className="pitch-ad-rail-label">
         <span>ESPACIO ADS</span>
         <button className="pitch-ad-pause" type="button" aria-label="Pausar anuncios" aria-pressed={paused} onClick={() => setPaused(value => !value)}>
           <span aria-hidden="true">{paused ? '▶ Reanudar' : 'Ⅱ Pausar'}</span>
         </button>
-      </div>
+      </div> */}
       {renderRail(0)}
     </aside>
     <aside className="pitch-ad-rail pitch-ad-rail-right" aria-label="Anuncios, segundo bloque">
-      <div className="pitch-ad-rail-label"><span>ESPACIO ADS</span><b>PUBLICIDAD</b></div>
+      {/* <div className="pitch-ad-rail-label"><span>ESPACIO ADS</span><b>PUBLICIDAD</b></div> */}
       {renderRail(1)}
     </aside>
   </div>

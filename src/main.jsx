@@ -1,6 +1,6 @@
-import { StrictMode, useLayoutEffect } from 'react'
+import { StrictMode, useLayoutEffect, useRef } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router'
+import { BrowserRouter, Link, Navigate, Route, Routes, useLocation, useNavigationType } from 'react-router'
 import '@fontsource-variable/geist'
 import '@fontsource-variable/geist-mono'
 import './styles.css'
@@ -30,9 +30,74 @@ function Legal({ privacy = false }) {
   </article>
 }
 
+function RouteScroll() {
+  const { hash, key, pathname } = useLocation()
+  const navigationType = useNavigationType()
+  const previousPath = useRef(pathname)
+  const positions = useRef(new Map())
+
+  useLayoutEffect(() => {
+    const original = window.history.scrollRestoration
+    window.history.scrollRestoration = 'manual'
+    return () => { window.history.scrollRestoration = original }
+  }, [])
+
+  useLayoutEffect(() => {
+    const changedPage = previousPath.current !== pathname
+    previousPath.current = pathname
+    const saved = navigationType === 'POP' ? positions.current.get(key) : undefined
+    let waiting = false
+    let observer
+    let timeout
+
+    function record() {
+      if (!waiting) positions.current.set(key, window.scrollY)
+    }
+    function stopWaiting() {
+      waiting = false
+      observer?.disconnect()
+      window.clearTimeout(timeout)
+      window.removeEventListener('pointerdown', stopWaiting)
+      window.removeEventListener('wheel', stopWaiting)
+      window.removeEventListener('keydown', stopWaiting)
+    }
+    function restore() {
+      window.scrollTo(0, saved)
+      if (Math.abs(window.scrollY - saved) <= 1) {
+        stopWaiting()
+        record()
+      }
+    }
+
+    if (saved !== undefined) {
+      restore()
+      // A view may still be too short to reach its old position while data loads.
+      if (Math.abs(window.scrollY - saved) > 1 && typeof ResizeObserver === 'function') {
+        waiting = true
+        observer = new ResizeObserver(restore)
+        observer.observe(document.getElementById('root'))
+        window.addEventListener('pointerdown', stopWaiting)
+        window.addEventListener('wheel', stopWaiting, { passive: true })
+        window.addEventListener('keydown', stopWaiting)
+        timeout = window.setTimeout(stopWaiting, 2500)
+      }
+    } else if (hash) {
+      document.getElementById(hash.slice(1))?.scrollIntoView()
+    } else if (changedPage) {
+      window.scrollTo(0, 0)
+    }
+    record()
+    window.addEventListener('scroll', record, { passive: true })
+    return () => {
+      stopWaiting()
+      window.removeEventListener('scroll', record)
+    }
+  }, [hash, key, navigationType, pathname])
+
+  return null
+}
+
 function App() {
-  const { pathname } = useLocation()
-  useLayoutEffect(() => { window.scrollTo(0, 0) }, [pathname])
   const routes = <Routes>
       <Route path="/" element={<DirectoryPage home />} />
       <Route path="/establecimientos" element={<DirectoryPage />} />
@@ -67,5 +132,5 @@ function App() {
 }
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode><BrowserRouter><Services><App /></Services></BrowserRouter></StrictMode>,
+  <StrictMode><BrowserRouter><RouteScroll /><Services><App /></Services></BrowserRouter></StrictMode>,
 )

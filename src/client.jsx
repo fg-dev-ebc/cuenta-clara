@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createAuthClient } from '@neon/auth'
 import { BetterAuthReactAdapter } from '@neon/auth/react/adapters'
 import { createRealtimeClient } from '@neon/realtime/client'
@@ -26,46 +26,78 @@ export async function api(path, { body, method = body === undefined ? 'GET' : 'P
   return data
 }
 
-export function useResource(path, read = api) {
+const publicResponses = new Map()
+
+export function usePublicResource(path, { keepPrevious = false } = {}) {
+  return useResource(path, api, { cache: publicResponses, keepPrevious })
+}
+
+export function useResource(path, read = api, { cache, keepPrevious = false } = {}) {
   const [state, setState] = useState(null)
   const [revision, setRevision] = useState(0)
+  const previous = useRef()
   const refresh = useCallback(() => setRevision((value) => value + 1), [])
   useEffect(() => {
     if (!path) return
     const controller = new AbortController()
     read(path, { signal: controller.signal }).then(
-      (data) => { if (!controller.signal.aborted) setState({ path, data }) },
+      (data) => {
+        if (controller.signal.aborted) return
+        const result = { path, data }
+        if (cache) {
+          cache.delete(path)
+          cache.set(path, result)
+          if (cache.size > 40) cache.delete(cache.keys().next().value)
+        }
+        setState(result)
+      },
       (error) => {
-        if (!controller.signal.aborted) setState((old) => ({ path, data: old?.path === path ? old.data : undefined, error }))
+        if (controller.signal.aborted) return
+        const cached = cache?.get(path)
+        const invalidate = cache && error.status >= 400 && error.status < 500
+        if (invalidate) cache.delete(path)
+        setState((old) => {
+          const last = old?.path === path ? old : cached
+          return { path, data: invalidate ? undefined : last?.data, error }
+        })
       },
     )
     return () => controller.abort()
-  }, [path, read, revision])
-  const current = state?.path === path ? state : undefined
-  return { ...current, loading: Boolean(path && !current), refresh }
+  }, [path, read, revision, cache])
+  const current = state?.path === path ? state : cache?.get(path)
+  useLayoutEffect(() => {
+    if (keepPrevious && (!path || current)) previous.current = current?.data
+  }, [current, keepPrevious, path])
+  const pending = Boolean(path && !current)
+  const retained = pending && keepPrevious ? previous.current : undefined
+  return { ...current, data: current?.data ?? retained, loading: pending && retained === undefined, updating: pending && retained !== undefined, refresh }
 }
 
-function ManagedAuth({ authUrl, children }) {
+function ManagedAuth({ authUrl, onSession }) {
   const client = useMemo(() => createAuthClient(new URL(authUrl, window.location.origin).href, {
     adapter: BetterAuthReactAdapter({ fetchOptions: { credentials: 'include' } }),
   }), [authUrl])
   const { data, isPending } = client.useSession()
   const user = data?.user
-  const account = useResource(user ? '/account' : null)
-  return <Auth.Provider value={{ client, user, loading: isPending, request: api, account: account.data, accountLoading: account.loading,
-    accountError: account.error, refreshAccount: account.refresh }}>{children}</Auth.Provider>
+  const { data: account, loading: accountLoading, error: accountError, refresh: refreshAccount } = useResource(user ? '/account' : null)
+  useLayoutEffect(() => {
+    onSession({ authUrl, value: { client, user, loading: isPending, request: api, account, accountLoading, accountError, refreshAccount } })
+  }, [authUrl, client, user, isPending, account, accountLoading, accountError, refreshAccount, onSession])
+  return null
 }
 
 export function Services({ children }) {
+  const [session, setSession] = useState(null)
   const config = useResource('/config')
   const authUrl = config.data?.authUrl
   const realtime = useMemo(() => config.data?.realtimeUrl
     ? createRealtimeClient({ url: config.data.realtimeUrl }) : null, [config.data?.realtimeUrl])
-  const content = realtime ? <RealtimeProvider client={realtime}>{children}</RealtimeProvider> : children
+  const auth = authUrl && session?.authUrl === authUrl ? session.value : { loading: config.loading || Boolean(authUrl) }
   return <Config.Provider value={{ ...config.data, loading: config.loading, realtime: Boolean(realtime) }}>
-    {authUrl
-      ? <ManagedAuth authUrl={authUrl}>{content}</ManagedAuth>
-      : <Auth.Provider value={{ loading: config.loading }}>{content}</Auth.Provider>}
+    <Auth.Provider value={auth}>
+      {authUrl && <ManagedAuth authUrl={authUrl} onSession={setSession} />}
+      <RealtimeProvider client={realtime}>{children}</RealtimeProvider>
+    </Auth.Provider>
   </Config.Provider>
 }
 
